@@ -66,9 +66,9 @@ Aegis Risk Assessment
 **Paperclip Integration**
 - Aegis works as a safety skill in [Paperclip](https://github.com/paperclipai/paperclip) zero-human companies. Any company doing DeFi operations can plug Aegis in as a mandatory pre-transaction check. See [paperclip/](./paperclip/) for the skill definition.
 
-**Deployed on Base Sepolia:**
-- AegisGateway: [`0x0fb808bfcb84990876e45fb9350e19c7c75498c3`](https://sepolia.basescan.org/address/0x0fb808bfcb84990876e45fb9350e19c7c75498c3)
-- MockHoneypot: [`0x4cb1f42ce5c7e216bd7a8effc943dfdfb9ccaaf3`](https://sepolia.basescan.org/address/0x4cb1f42ce5c7e216bd7a8effc943dfdfb9ccaaf3)
+**Deployed on Base Mainnet:**
+- AegisGateway: [`0x62c64c063ddbcd438f924184c03d8dad45230fa3`](https://basescan.org/address/0x62c64c063ddbcd438f924184c03d8dad45230fa3#code)
+- AegisSafetyHook: [`0xaEE532d9707b056f4d0939b91D4031298F7340C0`](https://basescan.org/address/0xaEE532d9707b056f4d0939b91D4031298F7340C0#code)
 
 ## What it catches
 
