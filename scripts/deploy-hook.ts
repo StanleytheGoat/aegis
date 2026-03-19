@@ -31,8 +31,8 @@ const rpcUrl = isMainnet
   ? (process.env.BASE_RPC || "https://mainnet.base.org")
   : (process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org");
 
-// CREATE2 deployer on Base
-const CREATE2_DEPLOYER = "0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2" as `0x${string}`;
+// Arachnid's deterministic CREATE2 deployer (per Uniswap v4 docs)
+const CREATE2_DEPLOYER = "0x4e59b44847b379578588920cA78FbF26c0B4956C" as `0x${string}`;
 
 // Load hook deployment config
 const hookConfigPath = path.join(import.meta.dirname, "../hook-deployment.json");

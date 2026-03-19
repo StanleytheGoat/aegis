@@ -10,8 +10,8 @@ import { keccak256, concat, getAddress, toBytes, encodeAbiParameters, parseAbiPa
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-// Base mainnet CREATE2 deployer
-const CREATE2_DEPLOYER = "0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2";
+// Arachnid's deterministic CREATE2 deployer (per Uniswap v4 docs)
+const CREATE2_DEPLOYER = "0x4e59b44847b379578588920cA78FbF26c0B4956C";
 // Base mainnet PoolManager
 const POOL_MANAGER = "0x498581ff718922c3f8e6a244956af099b2652b2b";
 
