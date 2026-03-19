@@ -1,0 +1,12 @@
+node_modules/
+dist/
+cache/
+artifacts/
+contracts/out/
+lib/
+.env
+.env.*
+deployment.json
+*.log
+coverage/
+typechain-types/
