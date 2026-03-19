@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Aegis — A Safety Layer for Autonomous DeFi Agents
+ * Aegis - A Safety Layer for Autonomous DeFi Agents
  *
  * Starts the Aegis MCP server, which provides DeFi safety tools
  * to any MCP-compatible AI agent.

@@ -1,5 +1,5 @@
 /**
- * Aegis Risk Engine — Transaction Simulator
+ * Aegis Risk Engine - Transaction Simulator
  *
  * Simulates transactions on a forked chain to detect:
  * - Reverts and unexpected failures
@@ -162,7 +162,7 @@ export async function checkTokenSellability(
       "function owner() view returns (address)",
     ]);
 
-    // Check if owner() returns address(0) — potential fake renounce
+    // Check if owner() returns address(0) - potential fake renounce
     try {
       const owner = await client.readContract({
         address: tokenAddress,
@@ -173,7 +173,7 @@ export async function checkTokenSellability(
         indicators.push("ownership_renounced_or_faked");
       }
     } catch {
-      // No owner function — could be fine
+      // No owner function - could be fine
     }
 
     // Check total supply and holder balance

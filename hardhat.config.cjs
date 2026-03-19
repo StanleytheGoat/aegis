@@ -3,7 +3,7 @@ require("@nomicfoundation/hardhat-toolbox");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.24",
+    version: "0.8.26",
     settings: {
       optimizer: {
         enabled: true,
@@ -20,9 +20,10 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.ETH_RPC_URL || "https://eth.llamarpc.com",
-        enabled: false,
+        url: process.env.BASE_RPC || "https://mainnet.base.org",
+        enabled: !!process.env.FORK_BASE,
       },
+      chainId: process.env.FORK_BASE ? 8453 : 31337,
     },
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org",

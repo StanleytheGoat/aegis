@@ -1,5 +1,5 @@
 /**
- * Aegis Risk Engine — Contract Scanner
+ * Aegis Risk Engine - Contract Scanner
  *
  * Analyzes smart contract source code and bytecode for known exploit patterns,
  * honeypot mechanics, and other security risks. Returns a risk assessment with

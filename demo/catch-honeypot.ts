@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 /**
- * Aegis Demo — Catching a Honeypot Token
+ * Aegis Demo - Catching a Honeypot Token
  *
  * This demo shows how Aegis protects an AI agent from swapping into
  * a malicious honeypot token. It:
@@ -31,7 +31,7 @@ function printHeader() {
   console.log(`
 ${CYAN}${BOLD}╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   ⛨  AEGIS — DeFi Safety Layer for AI Agents              ║
+║   ⛨  AEGIS - DeFi Safety Layer for AI Agents              ║
 ║                                                           ║
 ║   Demo: Catching a Honeypot Token                         ║
 ║                                                           ║
@@ -60,7 +60,7 @@ async function main() {
   printHeader();
 
   // Step 1: Load the honeypot contract
-  console.log(`${BOLD}Step 1: Agent discovers a new token — "Totally Safe Token" (SAFE)${RESET}`);
+  console.log(`${BOLD}Step 1: Agent discovers a new token - "Totally Safe Token" (SAFE)${RESET}`);
   console.log(`${DIM}The token claims to be a meme coin with 0% buy tax and renounced ownership.${RESET}`);
   console.log(`${DIM}Sounds great... but is it?${RESET}\n`);
 
@@ -100,14 +100,14 @@ async function main() {
   console.log(`${BOLD}Step 4: Agent Decision${RESET}\n`);
 
   if (result.recommendation === "avoid") {
-    console.log(`  ${RED}${BOLD}⛨ BLOCKED${RESET} — Aegis prevented the swap.`);
+    console.log(`  ${RED}${BOLD}⛨ BLOCKED${RESET} - Aegis prevented the swap.`);
     console.log(`  ${DIM}The agent's funds are safe. The honeypot was detected before execution.${RESET}`);
     console.log();
     console.log(`  ${CYAN}Without Aegis:${RESET}  Agent buys SAFE token, can never sell. Funds lost.`);
     console.log(`  ${GREEN}With Aegis:${RESET}     Agent detects 99% sell tax, fake renounce, sell pause.`);
     console.log(`                  Swap blocked. Zero loss.`);
   } else {
-    console.log(`  ${GREEN}ALLOWED${RESET} — Transaction appears safe.`);
+    console.log(`  ${GREEN}ALLOWED${RESET} - Transaction appears safe.`);
   }
 
   console.log(`\n${DIM}${"─".repeat(60)}${RESET}`);

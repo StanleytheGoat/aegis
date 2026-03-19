@@ -1,0 +1,10 @@
+{
+  "salt": "0x00000000000000000000000000000000000000000000000000000000005ac111",
+  "hookAddress": "0xaE3e9277Cb1638F6C891D1f1bC1dc89388c300C0",
+  "flags": "0xc0",
+  "deployer": "0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2",
+  "poolManager": "0x498581ff718922c3f8e6a244956af099b2652b2b",
+  "attester": "0x52A0eff814729B98cF75E43d195840CB77ADD941",
+  "network": "base-mainnet",
+  "chainId": 8453
+}

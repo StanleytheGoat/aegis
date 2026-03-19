@@ -1,5 +1,5 @@
 /**
- * Aegis Risk Engine — Known exploit pattern signatures.
+ * Aegis Risk Engine - Known exploit pattern signatures.
  *
  * Each pattern defines a bytecode or source-level signature that indicates
  * a potential vulnerability or malicious behavior in a smart contract.
@@ -130,7 +130,7 @@ export const EXPLOIT_PATTERNS: ExploitPattern[] = [
     id: "proxy-pattern",
     name: "Upgradeable Proxy",
     severity: "medium",
-    description: "Contract uses proxy pattern — logic can be changed post-deployment.",
+    description: "Contract uses proxy pattern - logic can be changed post-deployment.",
     riskWeight: 45,
     sourcePatterns: [
       /delegatecall|DELEGATECALL/,

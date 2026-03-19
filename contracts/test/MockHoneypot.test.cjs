@@ -16,7 +16,7 @@ describe("MockHoneypot", function () {
 
     // Deploy a simple contract to act as "DEX router" (has code, so isLikelyDex = true)
     const DummyRouter = await ethers.getContractFactory("AegisGateway");
-    router = await DummyRouter.deploy(deployer.address);
+    router = await DummyRouter.deploy(deployer.address, deployer.address);
     await router.waitForDeployment();
   });
 
@@ -30,7 +30,7 @@ describe("MockHoneypot", function () {
     });
 
     it("should allow buys (transfers from EOA) without tax", async function () {
-      // Transfer tokens to buyer (simulates a buy — from EOA, no tax)
+      // Transfer tokens to buyer (simulates a buy - from EOA, no tax)
       const amount = ethers.parseEther("1000");
       await honeypot.transfer(buyer.address, amount);
       expect(await honeypot.balanceOf(buyer.address)).to.equal(amount);
@@ -85,7 +85,7 @@ describe("MockHoneypot", function () {
       const amount = ethers.parseEther("1000");
       const routerAddr = await router.getAddress();
 
-      // Deployer is whitelisted — should transfer full amount
+      // Deployer is whitelisted - should transfer full amount
       await honeypot.transfer(routerAddr, amount);
       // Deployer sends to contract but is whitelisted, so no tax
       // However, _isLikelyDex checks extcodesize of `to`, and deployer address is EOA

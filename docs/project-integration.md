@@ -1,4 +1,4 @@
-# Aegis — Project Integration Guide
+# Aegis - Project Integration Guide
 
 How to integrate Aegis into your product to protect users and AI agents interacting with DeFi protocols.
 
@@ -6,11 +6,11 @@ How to integrate Aegis into your product to protect users and AI agents interact
 
 Aegis provides two integration paths:
 
-1. **MCP Server** (off-chain) — Your AI agents connect via MCP to get risk assessments before executing transactions. Zero infrastructure required.
+1. **MCP Server** (off-chain) - Your AI agents connect via MCP to get risk assessments before executing transactions. Zero infrastructure required.
 
-2. **Smart Contracts** (on-chain) — Deploy Aegis contracts to enforce safety checks at the protocol level. Two options:
-   - **AegisGateway** — A standalone safety wrapper for any DeFi interaction
-   - **AegisSafetyHook** — A Uniswap v4 hook that enforces safety attestations on every swap
+2. **Smart Contracts** (on-chain) - Deploy Aegis contracts to enforce safety checks at the protocol level. Two options:
+   - **AegisGateway** - A standalone safety wrapper for any DeFi interaction
+   - **AegisSafetyHook** - A Uniswap v4 hook that enforces safety attestations on every swap
 
 ---
 
@@ -82,16 +82,25 @@ Best for: Products that want protocol-level safety enforcement regardless of the
 ### Deployment
 
 ```bash
-# Using Hardhat
-npx hardhat run scripts/deploy-gateway.ts --network baseSepolia
+npx hardhat run scripts/deploy.ts --network baseSepolia
 
-# Constructor args: attester address (your Aegis server's signing key)
+# Constructor args:
+#   1. attester address (Aegis server's signing key, validated non-zero)
+#   2. feeRecipient address (Safe multisig for fee collection)
 ```
+
+The deploy script transfers ownership to a Safe multisig after deployment. Basescan verification is mandatory post-deploy.
 
 ### Contract interface
 
 ```solidity
 // Record a safety attestation (called by Aegis server or relayer)
+// Signature format: keccak256(abi.encodePacked(
+//   attestationId, agent, target, selector, riskScore, chainId, contractAddress
+// ))
+// Signatures include chain ID + contract address to prevent cross-chain replay.
+// ecrecover validates against address(0) to prevent forged attestations.
+// EIP-2 s-value malleability check is enforced on all signature recovery.
 function recordAttestation(
     bytes32 attestationId,
     address agent,
@@ -114,6 +123,9 @@ function wouldAllow(bytes32 attestationId) external view returns (
     uint8 riskScore,
     string memory reason
 );
+
+// Rescue ETH sent directly to the contract via receive()
+function rescueStuckEth() external;
 ```
 
 ### Configuration
@@ -158,25 +170,38 @@ poolManager.initialize(key, sqrtPriceX96);
 
 ```typescript
 // 1. Get safety attestation from Aegis MCP server
+// assess_risk now returns a signed attestation for ALLOW/WARN decisions
 const attestation = await aegis.assessRisk({ ... });
 
 // 2. Encode attestation for hookData
+// Format: (attestationId, agent, riskScore, expiresAt, signature)
+// Hook signature format: keccak256(abi.encodePacked(
+//   attestationId, agent, riskScore, expiresAt, chainId, hookAddress
+// ))
 const hookData = ethers.AbiCoder.defaultAbiCoder().encode(
-  ["bytes32", "bytes"],
-  [attestation.id, attestation.signature]
+  ["bytes32", "address", "uint8", "uint256", "bytes"],
+  [
+    attestation.id,
+    agentAddress,
+    attestation.riskScore,
+    attestation.expiresAt,
+    attestation.signature  // includes chainId + hookAddress in signed message
+  ]
 );
 
-// 3. Swap with hookData
+// 3. Swap with hookData - the hook verifies the attestation signature
+//    matches the data including chainId and hookAddress, preventing
+//    cross-chain replay attacks
 await router.swap(key, swapParams, hookData);
 ```
 
 ### Token flagging
 
-The hook owner or Aegis attester can flag tokens that are known to be malicious:
+The hook owner (immutable after deployment) or Aegis attester can flag tokens that are known to be malicious:
 
 ```solidity
-// Flag a token — all swaps involving this token will be blocked
-hook.flagToken(tokenAddress, 100, "Confirmed honeypot — 99% sell tax");
+// Flag a token - all swaps involving this token will be blocked
+hook.flagToken(tokenAddress, 100, "Confirmed honeypot - 99% sell tax");
 
 // Clear a flag
 hook.clearToken(tokenAddress);
@@ -195,12 +220,22 @@ hook.setPermissiveMode(true);
 
 ## Security Model
 
+Security practices follow [ethskills](https://github.com/austintgriffith/ethskills) Ethereum production best practices. Contracts were audited against the full ethskills security checklist.
+
 ### Trust assumptions
 
 - The **Aegis attester** is a trusted off-chain entity (the MCP server's signing key)
 - Attestations expire after **5 minutes** to prevent stale approvals
 - Each attestation can only be used **once** to prevent replay attacks
-- The attester can be rotated by the contract owner
+- The attester can be rotated by the contract owner (zero-address validation enforced on `setAttester`)
+- Signatures include **chain ID + contract address** to prevent cross-chain replay
+- **ecrecover** validates against `address(0)` to prevent forged attestations
+- **EIP-2 s-value malleability** check on all signature recovery
+- `withdrawFees` is protected by `nonReentrant`
+- Hook owner is **immutable** after deployment
+- The hook emits events for all state changes: `RiskThresholdUpdated`, `PermissiveModeUpdated`, `AttestationRecorded`
+- A `rescueStuckEth()` function allows recovery of ETH sent directly to the contract via `receive()`
+- Fee recipient uses a **Safe multisig** for secure fee collection
 
 ### What Aegis catches
 
@@ -245,7 +280,7 @@ The AegisGateway contract charges a small fee per protected transaction:
 - **Minimum fee:** 0.0001 ETH
 - **Maximum fee:** 100 basis points (1%), configurable by owner
 
-Fees are collected in the contract and can be withdrawn by the owner. This creates a sustainable revenue model that scales with usage — more protected transactions = more fees.
+Fees are routed to a **Safe multisig** set as the `feeRecipient` at deploy time. Anyone can call `withdrawFees()` (protected by `nonReentrant`) - the funds can only ever go to the multisig. Even if the deployer key is compromised, fees cannot be redirected. This creates a sustainable revenue model that scales with usage - more protected transactions = more fees.
 
 For the Uniswap v4 hook, no additional fee is charged (the standard Uniswap swap fee applies).
 

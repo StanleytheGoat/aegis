@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis - DeFi Safety Layer for Autonomous AI Agents</title>
+  <meta name="description" content="Aegis scans contracts, simulates transactions, and enforces on-chain protection before AI agents execute DeFi trades. MCP server for Claude, GPT, and any autonomous agent.">
+  <meta name="keywords" content="DeFi, security, MCP, AI agents, Ethereum, Base, smart contract, honeypot, rug pull, Uniswap">
+  <meta name="author" content="Aegis">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://aegis-defi.netlify.app">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Aegis - DeFi Safety Layer for Autonomous AI Agents">
+  <meta property="og:description" content="Scan contracts for 12 exploit patterns, simulate transactions on forked chains, and enforce safety on-chain. One MCP command to protect your agent.">
+  <meta property="og:url" content="https://aegis-defi.netlify.app">
+  <meta property="og:site_name" content="Aegis">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://aegis-defi.netlify.app/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Aegis - DeFi Safety Layer for Autonomous AI Agents">
+  <meta name="twitter:description" content="Scan contracts for 12 exploit patterns, simulate transactions on forked chains, and enforce safety on-chain.">
+  <meta name="twitter:image" content="https://aegis-defi.netlify.app/og.png">
+
+  <!-- Favicon (inline SVG shield) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z' fill='%230a0a0f' stroke='%2300ff88' stroke-width='2'/></svg>">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Aegis",
+    "description": "DeFi safety layer for autonomous AI agents. MCP server that scans contracts, simulates transactions, and enforces on-chain protection.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "url": "https://aegis-defi.netlify.app",
+    "license": "https://opensource.org/licenses/MIT",
+    "programmingLanguage": ["TypeScript", "Solidity"],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Aegis"
+    }
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========== Reset & Base ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #111118;
+      --bg-code: #0d0d14;
+      --border: #1e1e2e;
+      --border-bright: #2a2a3e;
+      --text: #e4e4ef;
+      --text-muted: #8888a0;
+      --text-dim: #55556a;
+      --accent: #00ff88;
+      --accent-dim: rgba(0, 255, 136, 0.12);
+      --accent-glow: rgba(0, 255, 136, 0.25);
+      --indigo: #6366f1;
+      --indigo-dim: rgba(99, 102, 241, 0.12);
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --yellow: #eab308;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.8; }
+
+    /* ========== Layout ========== */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      padding: 6rem 0;
+      position: relative;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* ========== Fade-in animation ========== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ========== Navigation ========== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 0;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--text);
+    }
+
+    .nav-shield {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-shield svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.125rem;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 8px;
+      color: var(--accent) !important;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-cta:hover { background: rgba(0, 255, 136, 0.18); border-color: rgba(0, 255, 136, 0.4); opacity: 1; }
+
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text-muted);
+      margin: 5px 0;
+      transition: 0.3s;
+    }
+
+    /* ========== Hero ========== */
+    .hero {
+      padding: 10rem 0 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .hero-shield {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .hero-shield svg {
+      width: 64px;
+      height: 64px;
+      filter: drop-shadow(0 0 24px var(--accent-glow));
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 1rem;
+      background: var(--indigo-dim);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 100px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #a5a7fc;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--indigo);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      margin-bottom: 1.5rem;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero h1 .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8125rem 1.75rem;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0f;
+    }
+    .btn-primary:hover { box-shadow: 0 4px 24px var(--accent-glow); color: #0a0a0f; opacity: 1; }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border-bright);
+    }
+    .btn-secondary:hover { border-color: var(--text-dim); opacity: 1; }
+
+    .hero-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .hero-install:hover { border-color: var(--border-bright); }
+    .hero-install code { color: var(--accent); }
+    .hero-install .copy-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      padding: 0.125rem 0.5rem;
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* ========== How It Works ========== */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .step-card:hover { border-color: var(--border-bright); }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .step-card:nth-child(1) .step-number { background: var(--accent-dim); color: var(--accent); }
+    .step-card:nth-child(2) .step-number { background: var(--indigo-dim); color: var(--indigo); }
+    .step-card:nth-child(3) .step-number { background: rgba(234, 179, 8, 0.12); color: var(--yellow); }
+
+    .step-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+    }
+
+    .step-arrow {
+      display: none;
+    }
+
+    /* ========== Exploit Patterns ========== */
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+
+    .pattern-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.875rem;
+      padding: 1.125rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.2s;
+    }
+    .pattern-card:hover { border-color: var(--border-bright); }
+
+    .pattern-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+
+    .severity-critical { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+    .severity-high { background: rgba(245, 158, 11, 0.15); color: var(--orange); }
+    .severity-medium { background: rgba(234, 179, 8, 0.12); color: var(--yellow); }
+
+    .pattern-info h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      line-height: 1.3;
+    }
+
+    .pattern-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ========== Integration ========== */
+    .integration-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 3rem;
+      margin-bottom: 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      padding: 0.625rem 1.25rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 0 0 12px 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .code-block pre {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+    }
+
+    .code-block .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-block .code-lang {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+
+    /* Syntax highlighting classes */
+    .syn-kw { color: #c792ea; }
+    .syn-str { color: #c3e88d; }
+    .syn-cm { color: #546e7a; }
+    .syn-fn { color: #82aaff; }
+    .syn-type { color: #ffcb6b; }
+    .syn-op { color: #89ddff; }
+    .syn-num { color: #f78c6c; }
+    .syn-accent { color: var(--accent); }
+
+    /* ========== On-Chain ========== */
+    .onchain-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .onchain-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .onchain-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .onchain-card .tag {
+      font-size: 0.6875rem;
+      font-family: var(--mono);
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .tag-base { background: rgba(0, 82, 255, 0.15); color: #5b8def; }
+    .tag-v4 { background: rgba(255, 0, 122, 0.12); color: #ff6b9d; }
+
+    .onchain-card p {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .onchain-detail {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .onchain-detail .label {
+      color: var(--text-dim);
+      min-width: 80px;
+    }
+
+    .onchain-detail .value { color: var(--accent); word-break: break-all; }
+
+    /* ========== Revenue ========== */
+    .revenue-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .revenue-box {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+
+    .revenue-stat {
+      text-align: center;
+      padding: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .revenue-stat .big-number {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: var(--mono);
+      line-height: 1;
+    }
+
+    .revenue-stat .big-label {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-top: 0.375rem;
+    }
+
+    .revenue-stat .big-sub {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .revenue-details {
+      padding-top: 0.5rem;
+    }
+
+    .revenue-details h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .revenue-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .revenue-item-icon {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: 0.5rem;
+    }
+
+    .revenue-item strong {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.125rem;
+      font-size: 0.9375rem;
+    }
+
+    .revenue-item p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      line-height: 1.55;
+    }
+
+    /* ========== Footer ========== */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+    }
+
+    .footer-brand svg { width: 20px; height: 20px; }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-license {
+      font-size: 0.8125rem;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2.75rem; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .patterns-grid { grid-template-columns: repeat(2, 1fr); }
+      .onchain-grid { grid-template-columns: 1fr; }
+      .revenue-box { grid-template-columns: 1fr; }
+      .revenue-stat { max-width: 200px; }
+    }
+
+    @media (max-width: 640px) {
+      section { padding: 4rem 0; }
+      .hero { padding: 7rem 0 4rem; }
+      .hero h1 { font-size: 2.125rem; }
+      .hero-sub { font-size: 1.0625rem; }
+      .section-title { font-size: 1.75rem; }
+      .patterns-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: block; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 15, 0.97);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        gap: 1rem;
+      }
+      .hero-install { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== Nav ========== -->
+  <nav>
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <span class="nav-shield">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="url(#shield-gradient)" stroke="#00ff88" stroke-width="1.5"/>
+            <path d="M9 12l2 2 4-4" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="shield-gradient" x1="12" y1="2" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#00ff88"/>
+                <stop offset="1" stop-color="#00cc6a"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        Aegis
+      </a>
+
+      <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#patterns">Patterns</a></li>
+        <li><a href="#integration">Integration</a></li>
+        <li><a href="#onchain">On-Chain</a></li>
+        <li><a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener" class="nav-cta">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ========== Hero ========== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-shield fade-in">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="url(#hero-shield-gradient)" stroke="#00ff88" stroke-width="1"/>
+          <path d="M9 12l2 2 4-4" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="hero-shield-gradient" x1="12" y1="2" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00ff88"/>
+              <stop offset="1" stop-color="#00aa55"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="hero-badge fade-in">
+        <span class="hero-badge-dot"></span>
+        Built for The Synthesis &middot; Ethereum Foundation &middot; March 2026
+      </div>
+
+      <h1 class="fade-in">
+        The <span class="accent">Shield</span> for<br>Autonomous DeFi
+      </h1>
+
+      <p class="hero-sub fade-in">
+        Scan contracts for exploit patterns. Simulate transactions on forked chains. Enforce safety on-chain. One MCP server to protect your AI agent.
+      </p>
+
+      <div class="hero-actions fade-in">
+        <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+        <a href="#integration" class="btn btn-secondary">Get Started</a>
+      </div>
+
+      <div class="hero-install fade-in" onclick="navigator.clipboard.writeText('npx aegis-defi').then(()=>{this.querySelector('.copy-hint').textContent='Copied!'})">
+        <span style="color: var(--text-dim);">$</span>
+        <code>npx aegis-defi</code>
+        <span class="copy-hint">Click to copy</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== How It Works ========== -->
+  <section id="how-it-works">
+    <div class="container">
+      <span class="section-label fade-in">How It Works</span>
+      <h2 class="section-title fade-in">Three layers of defense</h2>
+      <p class="section-subtitle fade-in">
+        Aegis intercepts the path between intent and execution, catching threats at every stage.
+      </p>
+
+      <div class="steps-grid">
+        <div class="step-card fade-in">
+          <div class="step-number">01</div>
+          <h3>Connect</h3>
+          <p>Add Aegis to your agent with a single command. Works with Claude, GPT, and any MCP-compatible client. Your agent gains four safety tools instantly.</p>
+        </div>
+        <div class="step-card fade-in">
+          <div class="step-number">02</div>
+          <h3>Scan &amp; Simulate</h3>
+          <p>Before any trade, Aegis scans the target contract against 12 exploit patterns and simulates the transaction on a forked chain. No real funds at risk.</p>
+        </div>
+        <div class="step-card fade-in">
+          <div class="step-number">03</div>
+          <h3>Enforce</h3>
+          <p>On-chain contracts provide a final safety net. AegisGateway routes transactions through verified checks. The Uniswap v4 hook blocks unsafe swaps at the pool level.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== What It Catches ========== -->
+  <section id="patterns">
+    <div class="container">
+      <span class="section-label fade-in">What It Catches</span>
+      <h2 class="section-title fade-in">12 exploit patterns, zero tolerance</h2>
+      <p class="section-subtitle fade-in">
+        Static analysis against known attack signatures in both source code and bytecode. Security-hardened contracts with cross-chain replay protection, EIP-2 malleability checks, and ecrecover guards.
+      </p>
+
+      <div class="patterns-grid">
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-critical">C</div>
+          <div class="pattern-info">
+            <h4>Asymmetric Buy/Sell Tax</h4>
+            <p>Traps funds with disproportionate sell tax</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-critical">C</div>
+          <div class="pattern-info">
+            <h4>Sell Pause Mechanism</h4>
+            <p>Owner can disable selling entirely</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-critical">C</div>
+          <div class="pattern-info">
+            <h4>Fake Ownership Renounce</h4>
+            <p>Hidden owner retains full control</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-critical">C</div>
+          <div class="pattern-info">
+            <h4>Reentrancy Vulnerability</h4>
+            <p>External call before state update</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-high">H</div>
+          <div class="pattern-info">
+            <h4>Hidden Max Sell Amount</h4>
+            <p>Prevents large position exits</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-high">H</div>
+          <div class="pattern-info">
+            <h4>Unrestricted Minting</h4>
+            <p>Unlimited token minting capability</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-high">H</div>
+          <div class="pattern-info">
+            <h4>Hidden Admin Functions</h4>
+            <p>Non-standard access control patterns</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-high">H</div>
+          <div class="pattern-info">
+            <h4>Flash Loan Vulnerability</h4>
+            <p>Manipulable price oracles</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-high">H</div>
+          <div class="pattern-info">
+            <h4>Permit/Approval Phishing</h4>
+            <p>Approval-draining mechanics</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-medium">M</div>
+          <div class="pattern-info">
+            <h4>Unlimited Approval</h4>
+            <p>Requires dangerous max approvals</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-medium">M</div>
+          <div class="pattern-info">
+            <h4>Blacklist Mechanism</h4>
+            <p>Can block addresses from transacting</p>
+          </div>
+        </div>
+        <div class="pattern-card fade-in">
+          <div class="pattern-icon severity-medium">M</div>
+          <div class="pattern-info">
+            <h4>Upgradeable Proxy</h4>
+            <p>Logic can change post-deployment</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Integration ========== -->
+  <section id="integration">
+    <div class="container">
+      <span class="section-label fade-in">Integration</span>
+      <h2 class="section-title fade-in">Running in under 30 seconds</h2>
+      <p class="section-subtitle fade-in">
+        One command for Claude Code. One JSON block for any MCP client.
+      </p>
+
+      <div class="fade-in">
+        <div class="integration-tabs">
+          <button class="tab-btn active" onclick="switchTab(event, 'tab-cli')">Claude CLI</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-json')">MCP Config</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-code')">Programmatic</button>
+        </div>
+
+        <div id="tab-cli" class="tab-content active">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Terminal</span>
+            </div>
+            <pre><span class="syn-cm"># Add Aegis to Claude Code</span>
+<span class="syn-accent">$</span> claude mcp add aegis npx aegis-defi
+
+<span class="syn-cm"># Or run directly</span>
+<span class="syn-accent">$</span> npx aegis-defi
+
+<span class="syn-cm"># Your agent now has 4 safety tools:</span>
+<span class="syn-cm">#   scan_contract      - Static analysis for 12 exploit patterns</span>
+<span class="syn-cm">#   simulate_transaction - Forked-chain tx simulation</span>
+<span class="syn-cm">#   check_token        - Anti-honeypot token checks</span>
+<span class="syn-cm">#   assess_risk        - All-in-one risk assessment</span></pre>
+          </div>
+        </div>
+
+        <div id="tab-json" class="tab-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JSON - claude_desktop_config.json</span>
+            </div>
+            <pre><span class="syn-op">{</span>
+  <span class="syn-accent">"mcpServers"</span><span class="syn-op">:</span> <span class="syn-op">{</span>
+    <span class="syn-accent">"aegis"</span><span class="syn-op">:</span> <span class="syn-op">{</span>
+      <span class="syn-str">"command"</span><span class="syn-op">:</span> <span class="syn-str">"npx"</span><span class="syn-op">,</span>
+      <span class="syn-str">"args"</span><span class="syn-op">:</span> <span class="syn-op">[</span><span class="syn-str">"aegis-defi"</span><span class="syn-op">]</span>
+    <span class="syn-op">}</span>
+  <span class="syn-op">}</span>
+<span class="syn-op">}</span></pre>
+          </div>
+        </div>
+
+        <div id="tab-code" class="tab-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">TypeScript</span>
+            </div>
+            <pre><span class="syn-kw">import</span> <span class="syn-op">{</span> <span class="syn-type">createAegisServer</span> <span class="syn-op">}</span> <span class="syn-kw">from</span> <span class="syn-str">"aegis-defi"</span><span class="syn-op">;</span>
+
+<span class="syn-cm">// Create and start the MCP server</span>
+<span class="syn-kw">const</span> server <span class="syn-op">=</span> <span class="syn-fn">createAegisServer</span><span class="syn-op">();</span>
+
+<span class="syn-cm">// Connect via stdio transport</span>
+<span class="syn-kw">const</span> transport <span class="syn-op">=</span> <span class="syn-kw">new</span> <span class="syn-type">StdioServerTransport</span><span class="syn-op">();</span>
+<span class="syn-kw">await</span> server.<span class="syn-fn">connect</span><span class="syn-op">(</span>transport<span class="syn-op">);</span>
+
+<span class="syn-cm">// The server exposes 4 tools:</span>
+<span class="syn-cm">//   scan_contract, simulate_transaction,</span>
+<span class="syn-cm">//   check_token, assess_risk</span>
+<span class="syn-cm">// assess_risk returns signed attestations for</span>
+<span class="syn-cm">// ALLOW/WARN decisions (chainId-bound signatures)</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== On-Chain ========== -->
+  <section id="onchain">
+    <div class="container">
+      <span class="section-label fade-in">On-Chain Enforcement</span>
+      <h2 class="section-title fade-in">Safety at the protocol level</h2>
+      <p class="section-subtitle fade-in">
+        Smart contracts on Base provide a final, trustless safety net that no off-chain tool can bypass.
+      </p>
+
+      <div class="onchain-grid">
+        <div class="onchain-card fade-in">
+          <h3>AegisGateway <span class="tag tag-base">Base</span></h3>
+          <p>Routes agent transactions through on-chain safety checks. Collects a 5 bps fee per transaction. Safe multisig is set at deployment - no admin key can redirect funds. Signatures include chain ID + contract address to prevent cross-chain replay.</p>
+          <div class="onchain-detail">
+            <span class="label">Network</span>
+            <span class="value">Base (Chain ID 8453)</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Fee</span>
+            <span class="value">5 bps (0.05%), nonReentrant</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Fee Wallet</span>
+            <span class="value">Safe multisig, immutable</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Security</span>
+            <span class="value">EIP-2 check, ecrecover guard, rescueStuckEth</span>
+          </div>
+        </div>
+
+        <div class="onchain-card fade-in">
+          <h3>AegisHook <span class="tag tag-v4">Uniswap v4</span></h3>
+          <p>A Uniswap v4 hook that runs safety checks before any swap executes. Operates at the pool level for automatic protection - unsafe swaps are blocked before they can settle. Hook owner is immutable. Deployed via CREATE2 at vanity address.</p>
+          <div class="onchain-detail">
+            <span class="label">Type</span>
+            <span class="value">beforeSwap hook, immutable owner</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Scope</span>
+            <span class="value">Pool-level enforcement</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Action</span>
+            <span class="value">Blocks flagged token swaps</span>
+          </div>
+          <div class="onchain-detail">
+            <span class="label">Events</span>
+            <span class="value">RiskThresholdUpdated, PermissiveModeUpdated, AttestationRecorded</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Revenue ========== -->
+  <section id="revenue" class="revenue-section">
+    <div class="container">
+      <span class="section-label fade-in">Revenue Model</span>
+      <h2 class="section-title fade-in">Sustainable by design</h2>
+
+      <div class="revenue-box fade-in">
+        <div class="revenue-stat">
+          <div class="big-number">5</div>
+          <div class="big-label">Basis Points</div>
+          <div class="big-sub">per transaction</div>
+        </div>
+
+        <div class="revenue-details">
+          <h3>How fees work</h3>
+          <div class="revenue-item">
+            <div class="revenue-item-icon"></div>
+            <div>
+              <strong>Transparent on-chain fee</strong>
+              <p>AegisGateway collects 0.05% on transactions routed through the gateway. This is enforced in the smart contract and visible to all parties.</p>
+            </div>
+          </div>
+          <div class="revenue-item">
+            <div class="revenue-item-icon"></div>
+            <div>
+              <strong>Safe multisig fee recipient</strong>
+              <p>Fees are sent to a Safe multisig set at deployment time. No admin function can change the destination. withdrawFees is protected by nonReentrant. No rug-pull vector.</p>
+            </div>
+          </div>
+          <div class="revenue-item">
+            <div class="revenue-item-icon"></div>
+            <div>
+              <strong>MCP tools are free</strong>
+              <p>Off-chain scanning, simulation, and risk assessment carry no fee. Only on-chain gateway routing has a cost.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Footer ========== -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#00ff88" opacity="0.5" stroke="#00ff88" stroke-width="1"/>
+            <path d="M9 12l2 2 4-4" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Aegis
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://github.com/StanleytheGoat/aegis#readme" target="_blank" rel="noopener">Docs</a></li>
+          <li><a href="https://github.com/StanleytheGoat/aegis/issues" target="_blank" rel="noopener">Issues</a></li>
+        </ul>
+
+        <span class="footer-license">MIT License</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== Scripts ========== -->
+  <script>
+    // Tab switching
+    function switchTab(e, tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Fade-in on scroll (IntersectionObserver)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelector('.nav-links').classList.remove('open');
+      });
+    });
+  </script>
+
+</body>
+</html>

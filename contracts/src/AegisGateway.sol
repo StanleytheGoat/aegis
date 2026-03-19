@@ -34,6 +34,8 @@ contract AegisGateway is Ownable, ReentrancyGuard {
     event RiskThresholdUpdated(uint8 oldThreshold, uint8 newThreshold);
     event FeeUpdated(uint256 oldFeeBps, uint256 newFeeBps);
     event AttesterUpdated(address oldAttester, address newAttester);
+    event FeesWithdrawn(address indexed recipient, uint256 amount);
+    event StuckEthRescued(address indexed recipient, uint256 amount);
 
     // --- Structs ---
     struct SafetyAttestation {
@@ -70,21 +72,22 @@ contract AegisGateway is Ownable, ReentrancyGuard {
     /// @notice Agent blocked transaction count
     mapping(address => uint256) public agentBlockedCount;
 
+    /// @notice Immutable fee recipient (cold wallet) - fees can ONLY go here
+    address payable public immutable feeRecipient;
+
     // --- Constructor ---
-    constructor(address _attester) Ownable(msg.sender) {
+    constructor(address _attester, address payable _feeRecipient) Ownable(msg.sender) {
+        require(_attester != address(0), "Invalid attester");
+        require(_feeRecipient != address(0), "Invalid fee recipient");
         attester = _attester;
+        feeRecipient = _feeRecipient;
     }
 
     // --- Core Functions ---
 
     /// @notice Record a safety attestation from the trusted Aegis MCP server.
     ///         Called off-chain by the attester after simulation + risk analysis.
-    /// @param attestationId Unique ID for this attestation
-    /// @param agent The agent that requested the safety check
-    /// @param target The target contract being interacted with
-    /// @param selector The function selector being called
-    /// @param riskScore The computed risk score (0-100)
-    /// @param signature EIP-191 signature from the attester
+    ///         Signature includes chain ID and contract address to prevent cross-chain replay.
     function recordAttestation(
         bytes32 attestationId,
         address agent,
@@ -95,13 +98,18 @@ contract AegisGateway is Ownable, ReentrancyGuard {
     ) external {
         require(attestations[attestationId].timestamp == 0, "Attestation exists");
         require(riskScore <= 100, "Invalid risk score");
+        require(agent != address(0), "Invalid agent");
+        require(target != address(0), "Invalid target");
 
-        // Verify the attester's signature
+        // Verify the attester's signature (includes chain ID + contract address to prevent replay)
         bytes32 messageHash = keccak256(abi.encodePacked(
-            attestationId, agent, target, selector, riskScore
+            attestationId, agent, target, selector, riskScore,
+            block.chainid, address(this)
         ));
         bytes32 ethSignedHash = _toEthSignedMessageHash(messageHash);
-        require(_recoverSigner(ethSignedHash, signature) == attester, "Invalid attester");
+        address recovered = _recoverSigner(ethSignedHash, signature);
+        require(recovered != address(0), "Invalid signature");
+        require(recovered == attester, "Invalid attester");
 
         attestations[attestationId] = SafetyAttestation({
             agent: agent,
@@ -117,9 +125,6 @@ contract AegisGateway is Ownable, ReentrancyGuard {
 
     /// @notice Execute a transaction through the safety gateway.
     ///         Requires a valid, unused attestation with risk below threshold.
-    /// @param attestationId The attestation ID from a prior safety check
-    /// @param target The target contract (must match attestation)
-    /// @param data The calldata to forward
     function executeProtected(
         bytes32 attestationId,
         address target,
@@ -135,17 +140,25 @@ contract AegisGateway is Ownable, ReentrancyGuard {
         require(att.riskScore <= riskThreshold, "Risk too high");
         require(block.timestamp - att.timestamp <= 5 minutes, "Attestation expired");
 
-        // Mark attestation as used
+        // Mark attestation as used (CEI: state before external call)
         att.used = true;
 
-        // Calculate and collect fee
-        uint256 fee = (msg.value * feeBps) / 10_000;
-        if (fee < minFee && msg.value >= minFee) {
-            fee = minFee;
+        // Calculate and collect fee (multiply before divide to avoid precision loss)
+        uint256 fee = 0;
+        if (msg.value > 0) {
+            fee = (msg.value * feeBps) / 10_000;
+            // Enforce minimum fee if tx value is large enough to cover it
+            if (fee < minFee && msg.value > minFee) {
+                fee = minFee;
+            }
+            // Never charge more fee than the transaction value
+            if (fee > msg.value) {
+                fee = msg.value;
+            }
         }
         accumulatedFees += fee;
 
-        // Forward the transaction
+        // Forward the transaction (safe: fee <= msg.value guaranteed above)
         uint256 forwardValue = msg.value - fee;
         (bool success, bytes memory result) = target.call{value: forwardValue}(data);
         require(success, string(abi.encodePacked("Execution failed: ", result)));
@@ -193,15 +206,30 @@ contract AegisGateway is Ownable, ReentrancyGuard {
     }
 
     function setAttester(address _attester) external onlyOwner {
+        require(_attester != address(0), "Invalid attester");
         emit AttesterUpdated(attester, _attester);
         attester = _attester;
     }
 
-    function withdrawFees(address payable to) external onlyOwner {
+    /// @notice Withdraw accumulated fees to the immutable feeRecipient (cold wallet).
+    ///         Anyone can call this - fees can only ever go to the cold wallet.
+    function withdrawFees() external nonReentrant {
         uint256 amount = accumulatedFees;
+        require(amount > 0, "No fees to withdraw");
         accumulatedFees = 0;
-        (bool success,) = to.call{value: amount}("");
+        (bool success,) = feeRecipient.call{value: amount}("");
         require(success, "Withdrawal failed");
+        emit FeesWithdrawn(feeRecipient, amount);
+    }
+
+    /// @notice Rescue ETH sent directly to the contract (not through executeProtected).
+    ///         Only rescues ETH above accumulatedFees. Goes to feeRecipient.
+    function rescueStuckEth() external nonReentrant {
+        uint256 stuck = address(this).balance - accumulatedFees;
+        require(stuck > 0, "No stuck ETH");
+        (bool success,) = feeRecipient.call{value: stuck}("");
+        require(success, "Rescue failed");
+        emit StuckEthRescued(feeRecipient, stuck);
     }
 
     // --- Internal Helpers ---
@@ -216,6 +244,8 @@ contract AegisGateway is Ownable, ReentrancyGuard {
         bytes32 s = bytes32(sig[32:64]);
         uint8 v = uint8(sig[64]);
         if (v < 27) v += 27;
+        // EIP-2: reject signatures with s in the upper half of the curve
+        require(s <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, "Invalid s value");
         return ecrecover(hash, v, r, s);
     }
 

@@ -1,164 +1,154 @@
 # Aegis
 
-**A safety layer for autonomous DeFi agents.**
+**Safety layer for autonomous DeFi agents.** | [Website](https://aegis-defi.netlify.app) | [Docs](./docs/agent-integration.md)
 
-Aegis is an MCP server + smart contract system that protects AI agents from malicious DeFi interactions. Before any on-chain transaction executes, Aegis simulates it, scans the target contract for exploit patterns, and returns a go/no-go decision — all in under a second.
+AI agents trading on-chain have no way to tell a legitimate token from a honeypot. Aegis fixes that. It's an MCP server that any agent can plug into, backed by on-chain contracts that enforce the safety checks.
 
-## The Problem
+Before an agent swaps, Aegis scans the target contract, simulates the transaction, and returns a simple go/no-go. If the contract has a 99% sell tax or a hidden pause function, the agent never touches it.
 
-AI agents are increasingly autonomous in DeFi — swapping tokens, providing liquidity, executing strategies. But they're vulnerable to the same scams that target humans: honeypot tokens, rug pulls, phishing contracts, and exploits. An agent that can't distinguish a legitimate token from a 99%-sell-tax honeypot will lose its funds on the first malicious interaction.
+## Why this exists
 
-## The Solution
+We watched an agent lose its entire wallet to a honeypot token in under 30 seconds. The token looked fine on the surface - verified contract, decent liquidity, active trading. But buried in the code was a 99% sell tax and a hidden owner behind a fake `renounceOwnership()`.
 
-Aegis sits between the agent and the chain as a trust layer:
+No agent framework had a way to catch this. So we built one.
+
+## How it works
 
 ```
-Agent → Aegis (scan + simulate + decide) → Chain
+Agent -> Aegis (scan + simulate + decide) -> Chain
 ```
 
-- **MCP Server**: Any MCP-compatible agent (Claude, GPT, etc.) connects and gets access to safety tools
-- **Risk Engine**: Static analysis of contract source/bytecode against 12+ known exploit patterns
-- **Transaction Simulator**: Dry-runs transactions on a forked chain to catch reverts and gas anomalies
-- **Uniswap v4 Hook**: On-chain enforcement — swaps are blocked unless a valid safety attestation exists
-- **Gateway Contract**: Standalone wrapper for non-Uniswap DeFi interactions
+1. Agent connects to Aegis via MCP (one line of config)
+2. Before any swap/approve/transfer, agent calls `assess_risk`
+3. Aegis scans the contract source, simulates the tx, checks for honeypot patterns
+4. Returns ALLOW, WARN, or BLOCK with a risk score (0-100)
+5. On-chain: the AegisGateway contract enforces attestations and collects a 5 bps fee
 
 ## Quick Start
 
-### As an MCP Server (recommended)
-
 ```bash
-# Claude Code
+# Add to Claude Code
 claude mcp add aegis npx aegis-defi
 
-# Claude Desktop — add to claude_desktop_config.json
-{
-  "mcpServers": {
-    "aegis": {
-      "command": "npx",
-      "args": ["aegis-defi"]
-    }
-  }
-}
-```
-
-### Demo
-
-```bash
-git clone https://github.com/paperclipai/aegis
-cd aegis
-npm install
+# Or clone and try the demo
+git clone https://github.com/StanleytheGoat/aegis
+cd aegis && npm install
 npx tsx demo/catch-honeypot.ts
 ```
 
-Watch Aegis catch a honeypot token in real-time:
+The demo deploys a deliberately malicious token (99% sell tax, fake ownership renounce, hidden admin) and watches Aegis catch every red flag:
 
 ```
-Step 1: Agent discovers "Totally Safe Token" (SAFE)
-Step 2: Agent calls Aegis → scan_contract
-Step 3: Aegis Risk Assessment
-  Risk Score:   [████████████████████░] 92/100
+Aegis Risk Assessment
+  Risk Score: 100/100
   Findings:
     [CRITICAL] Fake Ownership Renounce
     [CRITICAL] Asymmetric Buy/Sell Tax (99% sell)
     [CRITICAL] Sell Pause Mechanism
     [HIGH]     Hidden Max Sell Amount
     [HIGH]     Hidden Admin Functions
-Step 4: ⛨ BLOCKED — Agent's funds are safe.
+  Decision: BLOCK
 ```
 
-## Tools
+## What's in the box
 
-| Tool | Description |
-|------|-------------|
-| `scan_contract` | Analyze contract source/bytecode for exploit patterns |
-| `simulate_transaction` | Dry-run a transaction on a forked chain |
-| `check_token` | Anti-honeypot token safety check |
-| `assess_risk` | All-in-one comprehensive risk assessment |
+**MCP Server** (TypeScript)
+- `scan_contract` - pattern matching against 12 known exploit types
+- `simulate_transaction` - dry-run on a forked chain
+- `check_token` - anti-honeypot checks (sellability, concentrated holdings)
+- `assess_risk` - all of the above combined into one call. Returns a signed attestation for ALLOW/WARN decisions (falls back to MCP-only mode if no attester key configured)
 
-## Smart Contracts
+**Smart Contracts** (Solidity)
+- `AegisGateway` - safety wrapper for any DeFi interaction. Verifies attestations, checks risk scores, collects fees. Fees go to a Safe multisig that can never be changed, even by the contract owner. Signatures include chain ID + contract address to prevent cross-chain replay. ecrecover validates against address(0), EIP-2 s-value malleability check enforced, and `withdrawFees` is protected by `nonReentrant`. Includes `rescueStuckEth()` for ETH sent directly to `receive()`.
+- `AegisSafetyHook` - Uniswap v4 `beforeSwap` hook. Blocks swaps that don't have a valid safety attestation. Inline attestation verification extracts agent, risk score, and expiry from the signed message - no hardcoded defaults. Hook owner is immutable. Emits `RiskThresholdUpdated`, `PermissiveModeUpdated`, and `AttestationRecorded` events. Signatures include chain ID + hook address to prevent cross-chain replay.
+- `MockHoneypot` - a deliberately evil token for testing. Aegis scores it 100/100.
 
-### AegisSafetyHook (Uniswap v4)
+**Paperclip Integration**
+- Aegis works as a safety skill in [Paperclip](https://github.com/paperclipai/paperclip) zero-human companies. Any company doing DeFi operations can plug Aegis in as a mandatory pre-transaction check. See [paperclip/](./paperclip/) for the skill definition.
 
-A `beforeSwap` hook that enforces safety attestations on every trade. Agents must get an Aegis safety attestation before the swap proceeds. Malicious tokens can be flagged to block all swaps instantly.
+**Deployed on Base Sepolia:**
+- AegisGateway: [`0x0fb808bfcb84990876e45fb9350e19c7c75498c3`](https://sepolia.basescan.org/address/0x0fb808bfcb84990876e45fb9350e19c7c75498c3)
+- MockHoneypot: [`0x4cb1f42ce5c7e216bd7a8effc943dfdfb9ccaaf3`](https://sepolia.basescan.org/address/0x4cb1f42ce5c7e216bd7a8effc943dfdfb9ccaaf3)
 
-### AegisGateway
+## What it catches
 
-A standalone safety wrapper for any DeFi interaction. Transactions route through the gateway, which verifies attestations, checks risk scores, and collects a small protocol fee (5 bps).
+| Pattern | Severity |
+|---------|----------|
+| Asymmetric sell tax (50-99%) | Critical |
+| Sell pause mechanism | Critical |
+| Fake ownership renounce | Critical |
+| Reentrancy | Critical |
+| Hidden admin functions | High |
+| Unrestricted minting | High |
+| Hidden max sell amount | High |
+| Flash loan / oracle manipulation | High |
+| Permit/approval phishing | High |
+| Blacklist mechanism | Medium |
+| Upgradeable proxy | Medium |
+| Unlimited approval | Medium |
 
-### MockHoneypot
+What it does NOT catch: novel zero-days, social engineering, MEV/sandwich attacks, governance attacks.
 
-A deliberately malicious token contract for testing. Implements: 99% sell tax, sell pause, fake ownership renounce, hidden max sell amount. Aegis catches all of these.
+## Tests
 
-## Architecture
+```bash
+# TypeScript unit tests
+npm test
 
+# Contract tests
+npm run test:contracts
+
+# Demo (honeypot detection)
+npm run demo
 ```
-┌─────────────────┐     MCP (stdio)     ┌──────────────────┐
-│   AI Agent      │ ◄──────────────────► │  Aegis MCP       │
-│   (Claude, GPT) │                      │  Server          │
-└─────────────────┘                      └────────┬─────────┘
-                                                  │
-                                     ┌────────────┼────────────┐
-                                     │            │            │
-                               ┌─────▼──┐  ┌─────▼──┐  ┌──────▼─────┐
-                               │ Risk   │  │ Tx     │  │ Contract   │
-                               │ Engine │  │ Sim    │  │ Fetcher    │
-                               │        │  │        │  │ (Etherscan)│
-                               └────────┘  └────────┘  └────────────┘
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                         On-Chain Layer                              │
-│  ┌──────────────────┐              ┌──────────────────────────┐    │
-│  │  AegisGateway    │              │  AegisSafetyHook         │    │
-│  │  (any DeFi)      │              │  (Uniswap v4 beforeSwap) │    │
-│  └──────────────────┘              └──────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────┘
-```
+106 tests total (30 contract + 64 TypeScript + 12 Base mainnet fork tests):
+- 12 risk engine unit tests (pattern matching)
+- MCP server tests (tool execution, error handling)
+- Simulator unit tests (transaction simulation, token checks)
+- 30 contract tests (AegisGateway attestations/fees/admin, MockHoneypot, AegisSafetyHook)
+- 12 Base mainnet fork tests (run against real Base mainnet state)
+- Full fee flow test (fees verified landing in Safe multisig)
 
-## Exploit Patterns Detected
+## Revenue model
 
-| Pattern | Severity | Description |
-|---------|----------|-------------|
-| Asymmetric Buy/Sell Tax | Critical | Sells taxed 50-99%, buys are free |
-| Sell Pause Mechanism | Critical | Owner can disable selling |
-| Fake Ownership Renounce | Critical | `owner()` returns 0 but hidden owner exists |
-| Reentrancy Vulnerability | Critical | External call before state update |
-| Hidden Admin Functions | High | Custom auth bypasses standard Ownable |
-| Unrestricted Minting | High | Owner can mint unlimited tokens |
-| Hidden Max Sell Amount | High | Prevents large sell transactions |
-| Flash Loan Vulnerability | High | Manipulable price oracle |
-| Permit/Approval Phishing | High | Collects dangerous approvals |
-| Blacklist Mechanism | Medium | Can block addresses from transacting |
-| Upgradeable Proxy | Medium | Logic can change post-deployment |
-| Unlimited Approval | Medium | Requires max uint256 approval |
+5 bps (0.05%) on every transaction that goes through the gateway. The fee recipient is a Safe multisig set at deploy time. No one can change where fees go, not even the contract owner. `withdrawFees` is protected by `nonReentrant`. This was a deliberate security decision.
 
-## Supported Chains
+At scale, if 5% of agent transaction volume on Base flows through Aegis, that's roughly $25K/month at current volumes.
 
-| Chain | ID | Status |
-|-------|------|--------|
-| Ethereum Mainnet | 1 | Supported |
-| Base | 8453 | Supported |
-| Base Sepolia | 84532 | Supported |
+## Docs
 
-## Documentation
+- [Agent Integration Guide](./docs/agent-integration.md) - how to connect your agent (for both AI agents and human developers)
+- [Project Integration Guide](./docs/project-integration.md) - how to integrate Aegis into a product
+- [Paperclip Skill](./paperclip/) - how to add Aegis to a Paperclip zero-human company
+- [llms.txt](./site/llms.txt) - machine-readable description for agentic search
 
-- [Agent Integration Guide](./docs/agent-integration.md) — How AI agents connect to and use Aegis
-- [Project Integration Guide](./docs/project-integration.md) — How teams integrate Aegis into their products
+## Security practices
 
-## Revenue Model
+Built following [ethskills](https://github.com/austintgriffith/ethskills) Ethereum production best practices:
 
-The AegisGateway contract collects a small fee (default 5 bps / 0.05%) on every protected transaction. This creates sustainable, usage-based revenue that scales with adoption — no subscriptions, no tokens, just value-aligned incentives.
+- **Gas**: Base L2 gas is ~0.1-0.5 gwei (not 10-30). Deploy costs under $1.
+- **Signatures**: Chain ID + contract address in all signed messages (no cross-chain replay). EIP-2 s-value malleability check. ecrecover validated against address(0).
+- **Fee math**: Multiply before divide. Explicit overflow guards. Basis points (not percentages).
+- **Access control**: OZ Ownable + ReentrancyGuard on Gateway. Immutable owner on Hook.
+- **Deployment**: Safe Singleton Factory CREATE2 deployer. Source verified on Basescan. Ownership transferred to Safe multisig post-deploy.
+- **Base-specific**: Uses `block.timestamp` (not `block.number`). Correct chain ID 8453.
+- **Testing**: Fork tests against real Base mainnet state. Fuzz-compatible fee math.
 
-## Legal
+## Challenges we ran into
 
-Aegis is a security analysis and simulation service. It does not custody assets, execute trades, or provide financial advice. The smart contracts are pass-through wrappers with safety enforcement — they do not hold user funds beyond the scope of a single transaction.
+- Uniswap v4 hooks need to be deployed at addresses with specific permission bits set. You can't just deploy normally. We wrote a CREATE2 salt miner that finds addresses with the correct `beforeSwap` + `afterSwap` bits. Hook deployed via CREATE2 at a vanity address.
+- The v4 API changed between versions. `SwapParams` moved from `IPoolManager` to its own `PoolOperation.sol` file. Had to dig through the npm package to find the right imports.
+- The inline attestation verification in the v4 hook originally returned hardcoded values instead of extracting from the signature. We refactored to pass `(attestationId, agent, riskScore, expiresAt, signature)` in hookData and verify the full signed message on-chain. Signatures now include chain ID + contract/hook address to prevent cross-chain replay.
+- Stack-too-deep in the hook's `beforeSwap` required extracting token checks and attestation processing into separate internal functions.
+- Fee flow testing on testnet required deploying a helper contract (EthReceiver) because `executeProtected` forwards calls to the target.
+- Added comprehensive security hardening: ecrecover address(0) checks, EIP-2 s-value malleability enforcement, zero-address validation on attester, nonReentrant on withdrawFees, immutable hook owner, and rescueStuckEth() for ETH recovery.
 
-## Built For
+## Built for
 
-[The Synthesis](https://synthesis.md) — Ethereum Foundation Hackathon, March 2026
+[The Synthesis](https://synthesis.org) - Ethereum Foundation Hackathon, March 2026
 
-**Tracks:** Agents that trust, Agents that pay
-
-**Bounties:** Uniswap Agentic Finance, MetaMask Delegations
+Tracks: Agents that trust, Agents that pay
 
 ## License
 

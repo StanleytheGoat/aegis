@@ -1,5 +1,5 @@
 /**
- * Aegis Risk Engine — Main exports
+ * Aegis Risk Engine - Main exports
  */
 
 export { scanContractSource, scanBytecode, type ScanResult, type ScanFinding } from "./scanner.js";

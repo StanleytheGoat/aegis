@@ -269,7 +269,7 @@ async function main() {
     }) as [boolean, number, string];
 
     console.log(`    Allowed: ${allowed}, Score: ${score}, Reason: "${reason}"`);
-    if (allowed) throw new Error("Should NOT be allowed — risk too high");
+    if (allowed) throw new Error("Should NOT be allowed - risk too high");
   });
 
   console.log("\n=== All Tests Complete ===");

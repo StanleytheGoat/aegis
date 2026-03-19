@@ -17,6 +17,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { scanContractSource, scanBytecode } from "../risk-engine/scanner.js";
 import { simulateTransaction, checkTokenSellability } from "../risk-engine/simulator.js";
+import { signAttestation, generateAttestationId } from "../risk-engine/attester.js";
 import type { Address, Hex } from "viem";
 
 export function createAegisServer(): McpServer {
@@ -32,7 +33,7 @@ export function createAegisServer(): McpServer {
     {
       source: z.string().optional().describe("Solidity source code of the contract to analyze"),
       bytecode: z.string().optional().describe("Contract bytecode (hex) to analyze if source is unavailable"),
-      contractAddress: z.string().optional().describe("Contract address — if provided, will attempt to fetch source from block explorer"),
+      contractAddress: z.string().optional().describe("Contract address - if provided, will attempt to fetch source from block explorer"),
       chainId: z.number().default(1).describe("Chain ID (1=Ethereum, 8453=Base, 84532=Base Sepolia)"),
     },
     async ({ source, bytecode, contractAddress, chainId }) => {
@@ -229,6 +230,32 @@ export function createAegisServer(): McpServer {
 
       const decision = overallRisk >= 70 ? "BLOCK" : overallRisk >= 40 ? "WARN" : "ALLOW";
 
+      // If not blocked, sign an attestation for on-chain verification
+      let attestation: Record<string, string> | undefined;
+      if (decision !== "BLOCK") {
+        try {
+          const selector = transactionData ? transactionData.slice(0, 10) as Hex : "0x00000000" as Hex;
+          const att = await signAttestation({
+            agent: from as Address,
+            target: targetContract as Address,
+            selector,
+            riskScore: overallRisk,
+          });
+          attestation = {
+            attestationId: att.attestationId,
+            agent: att.agent,
+            target: att.target,
+            selector: att.selector,
+            riskScore: att.riskScore.toString(),
+            expiresAt: att.expiresAt.toString(),
+            signature: att.signature,
+          };
+        } catch {
+          // Attester key not configured - attestation unavailable
+          // MCP-only mode still works (agent gets the risk assessment)
+        }
+      }
+
       return {
         content: [{
           type: "text" as const,
@@ -238,6 +265,7 @@ export function createAegisServer(): McpServer {
             riskFactors: risks,
             action,
             checks,
+            attestation,
             recommendation: decision === "BLOCK"
               ? "DO NOT proceed with this transaction. High risk of fund loss."
               : decision === "WARN"
@@ -258,7 +286,7 @@ export function createAegisServer(): McpServer {
         uri: "aegis://info",
         mimeType: "text/plain",
         text: [
-          "Aegis — A Safety Layer for Autonomous DeFi Agents",
+          "Aegis - A Safety Layer for Autonomous DeFi Agents",
           "",
           "Available tools:",
           "- scan_contract: Analyze contract source/bytecode for exploit patterns",
@@ -318,7 +346,7 @@ async function fetchContractSource(
       return { bytecode: codeData.result };
     }
   } catch {
-    // Silently fail — caller will handle missing data
+    // Silently fail - caller will handle missing data
   }
 
   return {};

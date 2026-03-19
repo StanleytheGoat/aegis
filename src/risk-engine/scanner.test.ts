@@ -3,7 +3,7 @@ import { scanContractSource, scanBytecode } from "./scanner.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-describe("Risk Engine — Scanner", () => {
+describe("Risk Engine - Scanner", () => {
   describe("scanContractSource", () => {
     it("should detect all honeypot patterns in MockHoneypot", () => {
       const source = fs.readFileSync(

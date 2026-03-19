@@ -3,17 +3,34 @@ const { ethers } = require("hardhat");
 
 describe("AegisGateway", function () {
   let gateway;
+  let gatewayAddress;
   let owner;
   let attester;
   let agent;
   let target;
+  let feeRecipient;
+  let chainId;
+
+  // Helper to create signature hash matching the contract's format
+  // Includes chainId and contract address to prevent cross-chain replay
+  async function signAttestation(signer, attestationId, agentAddr, targetAddr, selector, riskScore) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["bytes32", "address", "address", "bytes4", "uint8", "uint256", "address"],
+      [attestationId, agentAddr, targetAddr, selector, riskScore, chainId, gatewayAddress]
+    );
+    return signer.signMessage(ethers.getBytes(messageHash));
+  }
 
   beforeEach(async function () {
-    [owner, attester, agent, target] = await ethers.getSigners();
+    [owner, attester, agent, target, feeRecipient] = await ethers.getSigners();
 
     const AegisGateway = await ethers.getContractFactory("AegisGateway");
-    gateway = await AegisGateway.deploy(attester.address);
+    gateway = await AegisGateway.deploy(attester.address, feeRecipient.address);
     await gateway.waitForDeployment();
+    gatewayAddress = await gateway.getAddress();
+
+    const network = await ethers.provider.getNetwork();
+    chainId = network.chainId;
   });
 
   describe("Deployment", function () {
@@ -32,6 +49,13 @@ describe("AegisGateway", function () {
     it("should have default fee of 5 bps", async function () {
       expect(await gateway.feeBps()).to.equal(5);
     });
+
+    it("should reject zero address attester", async function () {
+      const AegisGateway = await ethers.getContractFactory("AegisGateway");
+      await expect(
+        AegisGateway.deploy(ethers.ZeroAddress, feeRecipient.address)
+      ).to.be.revertedWith("Invalid attester");
+    });
   });
 
   describe("Attestation Recording", function () {
@@ -40,22 +64,12 @@ describe("AegisGateway", function () {
       const riskScore = 25;
       const selector = "0xa9059cbb"; // transfer(address,uint256)
 
-      // Create the message hash that the attester would sign
-      const messageHash = ethers.solidityPackedKeccak256(
-        ["bytes32", "address", "address", "bytes4", "uint8"],
-        [attestationId, agent.address, target.address, selector, riskScore]
+      const signature = await signAttestation(
+        attester, attestationId, agent.address, target.address, selector, riskScore
       );
 
-      // Sign as the attester
-      const signature = await attester.signMessage(ethers.getBytes(messageHash));
-
       await gateway.recordAttestation(
-        attestationId,
-        agent.address,
-        target.address,
-        selector,
-        riskScore,
-        signature
+        attestationId, agent.address, target.address, selector, riskScore, signature
       );
 
       const att = await gateway.attestations(attestationId);
@@ -69,22 +83,14 @@ describe("AegisGateway", function () {
       const riskScore = 25;
       const selector = "0xa9059cbb";
 
-      const messageHash = ethers.solidityPackedKeccak256(
-        ["bytes32", "address", "address", "bytes4", "uint8"],
-        [attestationId, agent.address, target.address, selector, riskScore]
-      );
-
       // Sign as the wrong signer (agent instead of attester)
-      const signature = await agent.signMessage(ethers.getBytes(messageHash));
+      const signature = await signAttestation(
+        agent, attestationId, agent.address, target.address, selector, riskScore
+      );
 
       await expect(
         gateway.recordAttestation(
-          attestationId,
-          agent.address,
-          target.address,
-          selector,
-          riskScore,
-          signature
+          attestationId, agent.address, target.address, selector, riskScore, signature
         )
       ).to.be.revertedWith("Invalid attester");
     });
@@ -94,12 +100,9 @@ describe("AegisGateway", function () {
       const riskScore = 25;
       const selector = "0xa9059cbb";
 
-      const messageHash = ethers.solidityPackedKeccak256(
-        ["bytes32", "address", "address", "bytes4", "uint8"],
-        [attestationId, agent.address, target.address, selector, riskScore]
+      const signature = await signAttestation(
+        attester, attestationId, agent.address, target.address, selector, riskScore
       );
-
-      const signature = await attester.signMessage(ethers.getBytes(messageHash));
 
       await gateway.recordAttestation(
         attestationId, agent.address, target.address, selector, riskScore, signature
@@ -110,6 +113,21 @@ describe("AegisGateway", function () {
           attestationId, agent.address, target.address, selector, riskScore, signature
         )
       ).to.be.revertedWith("Attestation exists");
+    });
+
+    it("should reject zero address agent", async function () {
+      const attestationId = ethers.id("test-zero-agent");
+      const selector = "0xa9059cbb";
+
+      const signature = await signAttestation(
+        attester, attestationId, ethers.ZeroAddress, target.address, selector, 10
+      );
+
+      await expect(
+        gateway.recordAttestation(
+          attestationId, ethers.ZeroAddress, target.address, selector, 10, signature
+        )
+      ).to.be.revertedWith("Invalid agent");
     });
   });
 
@@ -147,6 +165,31 @@ describe("AegisGateway", function () {
     it("should allow owner to update attester", async function () {
       await gateway.setAttester(agent.address);
       expect(await gateway.attester()).to.equal(agent.address);
+    });
+
+    it("should reject zero address attester update", async function () {
+      await expect(
+        gateway.setAttester(ethers.ZeroAddress)
+      ).to.be.revertedWith("Invalid attester");
+    });
+  });
+
+  describe("Fee Recipient", function () {
+    it("should set immutable feeRecipient on deploy", async function () {
+      expect(await gateway.feeRecipient()).to.equal(feeRecipient.address);
+    });
+
+    it("should reject zero address feeRecipient", async function () {
+      const AegisGateway = await ethers.getContractFactory("AegisGateway");
+      await expect(
+        AegisGateway.deploy(attester.address, ethers.ZeroAddress)
+      ).to.be.revertedWith("Invalid fee recipient");
+    });
+
+    it("should allow anyone to call withdrawFees", async function () {
+      await expect(
+        gateway.connect(agent).withdrawFees()
+      ).to.be.revertedWith("No fees to withdraw");
     });
   });
 });
