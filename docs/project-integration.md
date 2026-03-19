@@ -79,17 +79,17 @@ Best for: Products that want protocol-level safety enforcement regardless of the
 4. Agent calls `executeProtected()` which verifies the attestation and forwards the transaction
 5. A small protocol fee (5 bps) is collected
 
-### Deployment
+### Deployed on Base Mainnet
+
+- AegisGateway: [`0x62c64c063ddbcd438f924184c03d8dad45230fa3`](https://basescan.org/address/0x62c64c063ddbcd438f924184c03d8dad45230fa3#code)
+
+Ownership transferred to Safe multisig. Source verified on Basescan.
+
+To deploy your own instance:
 
 ```bash
-npx hardhat run scripts/deploy.ts --network baseSepolia
-
-# Constructor args:
-#   1. attester address (Aegis server's signing key, validated non-zero)
-#   2. feeRecipient address (Safe multisig for fee collection)
+npx tsx scripts/deploy-gateway.ts --network base --fee-recipient <your-safe-address>
 ```
-
-The deploy script transfers ownership to a Safe multisig after deployment. Basescan verification is mandatory post-deploy.
 
 ### Contract interface
 
@@ -141,6 +141,8 @@ function rescueStuckEth() external;
 ## Path 3: AegisSafetyHook (Uniswap v4)
 
 Best for: Projects deploying Uniswap v4 pools that want built-in safety for AI agent swaps.
+
+**Deployed on Base Mainnet:** [`0xaEE532d9707b056f4d0939b91D4031298F7340C0`](https://basescan.org/address/0xaEE532d9707b056f4d0939b91D4031298F7340C0#code)
 
 ### How it works
 

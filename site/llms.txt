@@ -97,17 +97,20 @@ const server = createAegisServer();
 Network: Base (Chain ID 8453)
 
 ### AegisGateway
-Routes agent transactions through safety checks with on-chain enforcement. Signatures include chain ID + contract address to prevent cross-chain replay. ecrecover validates against address(0), EIP-2 s-value malleability check enforced, withdrawFees protected by nonReentrant. Includes rescueStuckEth() for ETH recovery.
+Address: 0x62c64c063ddbcd438f924184c03d8dad45230fa3 (Base mainnet, verified on Basescan)
+Routes agent transactions through safety checks with on-chain enforcement. Signatures include chain ID + contract address to prevent cross-chain replay.
 - Fee: 5 basis points (0.05%) per transaction
-- Fee recipient: Safe multisig, set at deployment
-- Supports ETH and ERC-20 transfers
-- Zero-address validation on attester in constructor and setAttester
+- Fee recipient: Safe multisig, immutable
+- Ownership transferred to Safe multisig
+- Source verified on Basescan
 
-### AegisHook (Uniswap v4)
-Uniswap v4 hook that runs Aegis safety checks before swaps execute. Hook owner is immutable. Signatures include chain ID + hook address to prevent cross-chain replay. Emits RiskThresholdUpdated, PermissiveModeUpdated, and AttestationRecorded events.
-- Integrates at the pool level for automatic protection
+### AegisSafetyHook (Uniswap v4)
+Address: 0xaEE532d9707b056f4d0939b91D4031298F7340C0 (Base mainnet, verified on Basescan)
+Uniswap v4 hook that runs safety checks before swaps execute. Deployed via CREATE2.
+- Blocks swaps without valid safety attestation
 - Blocks swaps involving flagged tokens
-- Deployed via CREATE2 at vanity address
+- Hook owner is immutable
+- Source verified on Basescan
 
 ## Security
 
