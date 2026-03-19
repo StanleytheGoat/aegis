@@ -11,3 +11,4 @@ deployment.json
 *.log
 coverage/
 typechain-types/
+.npmrc
