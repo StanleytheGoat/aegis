@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { scanContractSource, scanBytecode } from "./scanner.js";
+import { EXPLOIT_PATTERNS } from "./patterns.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -28,7 +29,7 @@ describe("Risk Engine - Scanner", () => {
     it("should return safe for a clean ERC20", () => {
       const cleanSource = `
         // SPDX-License-Identifier: MIT
-        pragma solidity ^0.8.24;
+        pragma solidity 0.8.19;
 
         import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -135,6 +136,229 @@ describe("Risk Engine - Scanner", () => {
       );
       const result = scanContractSource(source);
       expect(result.riskScore).toBeLessThanOrEqual(100);
+    });
+  });
+
+  describe("flash loan patterns", () => {
+    it("should detect flash loan oracle manipulation", () => {
+      const source = `
+        function executeOperation(uint256 amount) external {
+          IFlashLoan(lender).flashLoan(amount);
+          uint256 price = pair.getReserves();
+          // manipulate and profit
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("flash-loan-oracle-manipulation");
+    });
+
+    it("should detect flash loan governance attack", () => {
+      const source = `
+        function attack() external {
+          IFlashLoan(lender).flashLoan(1000000e18);
+          governor.castVote(proposalId, 1);
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("flash-loan-governance");
+    });
+  });
+
+  describe("governance patterns", () => {
+    it("should detect emergency execute without timelock", () => {
+      const source = `
+        function emergencyWithdraw(address target) external onlyOwner {
+          target.call{value: address(this).balance}("");
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("governance-emergency-bypass");
+    });
+
+    it("should detect timelock admin takeover", () => {
+      const source = `
+        function setAdmin(address newAdmin) external {
+          setPendingAdmin(newAdmin);
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("governance-timelock-takeover");
+    });
+  });
+
+  describe("cross-chain & bridge patterns", () => {
+    it("should detect bridge validator compromise risk", () => {
+      const source = `
+        uint256 public threshold = 2;
+        function processWithdrawal(bytes[] calldata signatures) external {
+          require(signatures.length >= 2, "insufficient signatures");
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("bridge-validator-compromise");
+    });
+  });
+
+  describe("NFT patterns", () => {
+    it("should detect NFT metadata tampering", () => {
+      const source = `
+        function setBaseURI(string memory newURI) external onlyOwner {
+          _baseURI = newURI;
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("nft-metadata-tamper");
+    });
+  });
+
+  describe("solidity/EVM patterns", () => {
+    it("should detect floating pragma", () => {
+      const source = `
+        pragma solidity ^0.8.20;
+        contract Foo {}
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("evm-floating-pragma");
+    });
+
+    it("should detect deprecated functions", () => {
+      const source = `
+        function destroy() external {
+          suicide(msg.sender);
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("evm-deprecated-functions");
+    });
+
+    it("should detect typographical operator error", () => {
+      const source = `
+        function update(uint256 amount) external {
+          total =+ amount;
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("evm-typo-operator");
+    });
+  });
+
+  describe("external interaction patterns", () => {
+    it("should detect arbitrary external call", () => {
+      const source = `
+        function execute(address target, bytes memory data) external onlyOwner {
+          target.call{value: msg.value}(data);
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("ext-arbitrary-call");
+    });
+  });
+
+  describe("staking patterns", () => {
+    it("should detect staking withdrawal delay", () => {
+      const source = `
+        uint256 public cooldownPeriod = 7 days;
+        function unstake() external {
+          require(block.timestamp >= unlockTime[msg.sender], "cooldown");
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("staking-withdrawal-delay");
+    });
+  });
+
+  describe("novel attack patterns", () => {
+    it("should detect transient storage usage", () => {
+      const source = `
+        function lock() internal {
+          assembly {
+            tstore(0x00, 1)
+          }
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("novel-transient-storage-reentrancy");
+    });
+  });
+
+  describe("economic patterns", () => {
+    it("should detect bonding curve manipulation risk", () => {
+      const source = `
+        BondingCurve public curve;
+        function buy(uint256 amount) external payable {
+          uint256 price = curvePrice * supply;
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("economic-bonding-curve");
+    });
+
+    it("should detect griefing attack surface", () => {
+      const source = `
+        address public highestBidder;
+        function bid() external payable {
+          require(msg.value > currentBid);
+          highestBidder = msg.sender;
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("economic-griefing");
+    });
+  });
+
+  describe("permit & approval patterns", () => {
+    it("should detect Permit2 over-permissioning", () => {
+      const source = `
+        IAllowanceTransfer public permit2;
+        function depositWithPermit(uint256 amount) external {
+          permit2.transferFrom(msg.sender, address(this), amount, token);
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("permit2-over-permission");
+    });
+  });
+
+  describe("lending patterns", () => {
+    it("should detect bad debt accumulation risk", () => {
+      const source = `
+        uint256 public badDebt;
+        function liquidate(address user) external {
+          if (collateral < debt) {
+            badDebt += debt - collateral;
+          }
+        }
+      `;
+      const result = scanContractSource(source);
+      const patternIds = result.findings.map((f) => f.patternId);
+      expect(patternIds).toContain("lending-bad-debt");
+    });
+  });
+
+  describe("pattern count", () => {
+    it("should have at least 150 patterns defined", () => {
+      expect(EXPLOIT_PATTERNS.length).toBeGreaterThanOrEqual(150);
+    });
+
+    it("should have unique pattern IDs", () => {
+      const ids = EXPLOIT_PATTERNS.map((p) => p.id);
+      const uniqueIds = new Set(ids);
+      expect(uniqueIds.size).toBe(ids.length);
     });
   });
 
