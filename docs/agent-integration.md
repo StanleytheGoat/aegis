@@ -25,10 +25,6 @@ claude mcp add aegis npx aegis-defi
 }
 ```
 
-### For Paperclip Companies
-
-If you're running a zero-human company on [Paperclip](https://github.com/paperclipai/paperclip), add Aegis as a safety skill. See the [Paperclip integration guide](../paperclip/README.md).
-
 ### For Any MCP-Compatible Agent
 
 Aegis runs as a standard MCP server over stdio:
@@ -248,7 +244,7 @@ See [Project Integration Guide](./project-integration.md) for contract details.
 │                 │ ◄──────────────────► │                  │
 │   AI Agent      │                      │  Aegis MCP       │
 │  (Claude, GPT,  │                      │  Server          │
-│   Paperclip)    │                      │                  │
+│   any agent)    │                      │                  │
 └─────────────────┘                      └───────┬──────────┘
                                                  │
                                     ┌────────────┼────────────┐

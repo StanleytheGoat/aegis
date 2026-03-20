@@ -4,17 +4,7 @@ Run the Aegis status checker and display a dashboard view of all systems.
 
 ## Steps
 
-1. Run the status checker:
-```bash
-cd /Users/agent/Desktop/crazy/aegis && npx tsx scripts/status-check.ts
-```
-
-2. Read the generated status file:
-```bash
-cat /Users/agent/Desktop/crazy/aegis/.aegis-status.json
-```
-
-3. Present a clean dashboard:
+1. Check the current state of all Aegis systems and present a clean dashboard:
 
 ```
 AEGIS STATUS DASHBOARD

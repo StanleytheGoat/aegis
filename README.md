@@ -65,9 +65,6 @@ Aegis Risk Assessment
 - `AegisSafetyHook` - Uniswap v4 `beforeSwap` hook. Blocks swaps that don't have a valid safety attestation. Inline attestation verification extracts agent, risk score, and expiry from the signed message - no hardcoded defaults. Hook owner is immutable. Emits `RiskThresholdUpdated`, `PermissiveModeUpdated`, and `AttestationRecorded` events. Signatures include chain ID + hook address to prevent cross-chain replay.
 - `MockHoneypot` - a deliberately evil token for testing. Aegis scores it 100/100.
 
-**Paperclip Integration**
-- Aegis works as a safety skill in [Paperclip](https://github.com/paperclipai/paperclip) zero-human companies. Any company doing DeFi operations can plug Aegis in as a mandatory pre-transaction check.
-
 **Deployed on Base Mainnet:**
 - AegisGateway: [`0x62c64c063ddbcd438f924184c03d8dad45230fa3`](https://basescan.org/address/0x62c64c063ddbcd438f924184c03d8dad45230fa3#code)
 - AegisSafetyHook: [`0xaEE532d9707b056f4d0939b91D4031298F7340C0`](https://basescan.org/address/0xaEE532d9707b056f4d0939b91D4031298F7340C0#code)

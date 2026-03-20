@@ -6,7 +6,6 @@ description: Protocol monitoring and incident response skill for Aegis. Triggers
 # Aegis Monitoring Operations
 
 ## Status Check
-Run: npx tsx scripts/status-check.ts
 Checks: on-chain contracts, npm version, GitHub visibility, website, PR status, pattern count consistency, secret leak scanning.
 
 ## Incident Response Procedure

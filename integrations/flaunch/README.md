@@ -100,7 +100,7 @@ See [example.ts](./example.ts) for a complete working example of a Flaunch tradi
 
 ## Skill file
 
-See [skill.md](./skill.md) for a Paperclip-style skill file that teaches an AI agent how to safely trade on Flaunch using Aegis.
+See [skill.md](./skill.md) for a skill file that teaches an AI agent how to safely trade on Flaunch using Aegis.
 
 ## Environment variables
 
