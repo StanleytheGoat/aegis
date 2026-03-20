@@ -169,8 +169,9 @@ export async function simulateTransaction(req: SimulationRequest): Promise<Simul
 }
 
 /**
- * Check if a token contract allows selling (anti-honeypot check).
- * Simulates: approve(router, amount) + router.swapExactTokensForETH(...)
+ * Check token contract for honeypot indicators.
+ * Reads owner, totalSupply, and balanceOf to detect concentrated holdings
+ * and fake ownership renouncement. Combine with scan_contract for full coverage.
  */
 export async function checkTokenSellability(
   chainId: number,
@@ -275,7 +276,9 @@ export async function fetchContractSource(
   const apiBase = explorerApis[chainId];
   if (!apiBase) return {};
 
-  const apiKey = process.env.ETHERSCAN_API_KEY || "";
+  const apiKey = (chainId === 8453 || chainId === 84532)
+    ? (process.env.BASESCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "")
+    : (process.env.ETHERSCAN_API_KEY || "");
 
   try {
     const fetchOpts = { signal: AbortSignal.timeout(10_000) };

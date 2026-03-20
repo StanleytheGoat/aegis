@@ -10,6 +10,8 @@
  * - simulate_transaction: Simulate a transaction on a forked chain
  * - check_token: Check if a token is safe to trade (anti-honeypot)
  * - assess_risk: Get a comprehensive risk assessment combining all checks
+ * - trace_transaction: Trace all internal calls and scan every contract touched
+ * - search_solodit: Search 50K+ real-world audit findings from top security firms
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -256,12 +258,14 @@ export function createAegisServer(): McpServer {
         try {
           const selector = transactionData ? transactionData.slice(0, 10) as Hex : "0x00000000" as Hex;
           // Gateway attestation
+          const gatewayAddress = process.env.AEGIS_GATEWAY_ADDRESS || "0x62c64c063ddbcd438f924184c03d8dad45230fa3";
           const att = await signAttestation({
             agent: from as Address,
             target: targetContract as Address,
             selector,
             riskScore: overallRisk,
             chainId,
+            contractAddress: gatewayAddress as Address,
           });
           attestation = {
             attestationId: att.attestationId,
@@ -273,12 +277,14 @@ export function createAegisServer(): McpServer {
             signature: att.signature,
           };
           // Hook attestation (for Uniswap v4 hook-protected pools)
+          const hookContractAddress = process.env.AEGIS_HOOK_ADDRESS || "0xaEE532d9707b056f4d0939b91D4031298F7340C0";
           const hookAtt = await signHookAttestation({
             agent: from as Address,
             target: targetContract as Address,
             selector,
             riskScore: overallRisk,
             chainId,
+            contractAddress: hookContractAddress as Address,
           });
           hookAttestation = {
             attestationId: hookAtt.attestationId,

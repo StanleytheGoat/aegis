@@ -122,8 +122,8 @@ async function main() {
     // Create the message hash matching the contract's logic
     const messageHash = keccak256(
       encodePacked(
-        ["bytes32", "address", "address", "bytes4", "uint8"],
-        [attestationId, account.address, honeypotAddress, selector, riskScore]
+        ["bytes32", "address", "address", "bytes4", "uint8", "uint256", "address"],
+        [attestationId, account.address, honeypotAddress, selector, riskScore, BigInt(84532), gatewayAddress]
       )
     );
 

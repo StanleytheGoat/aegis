@@ -5,26 +5,31 @@
  * a potential vulnerability or malicious behavior in a smart contract.
  *
  * 165 patterns across 25 categories:
- *   - Token Scam & Honeypot (20)
- *   - Reentrancy Variants (7)
- *   - Access Control & Authorization (8)
- *   - Oracle Manipulation (5)
- *   - Proxy & Upgradeability (7)
- *   - Signature & Cryptographic (6)
- *   - Weird ERC20 Behaviors (7)
- *   - DeFi-Specific (7)
- *   - DoS Patterns (7)
- *   - Input Validation & Misc (11)
- *   - Additional High-Impact (11)
- *   - Flash Loan Attacks (5)
- *   - MEV & Front-Running (5)
- *   - Governance Attacks (5)
- *   - Cross-Chain & Bridge (5)
- *   - NFT-Specific (5)
- *   - Solidity/EVM Specific (8)
- *   - Unchecked External Interactions (4)
- *   - Staking, Vaults & Yield (5)
- *   - Recent & Novel Attack Vectors (5)
+ *   1. Token Scam & Honeypot (20)
+ *   2. Reentrancy Variants (7)
+ *   3. Access Control & Authorization (8)
+ *   4. Oracle Manipulation (5)
+ *   5. Proxy & Upgradeability (7)
+ *   6. Signature & Cryptographic (6)
+ *   7. Weird ERC20 Behaviors (7)
+ *   8. DeFi-Specific (7)
+ *   9. DoS Patterns (7)
+ *  10. Input Validation & Misc (11)
+ *  11. Additional High-Impact (11)
+ *  12. Flash Loan Attacks (5)
+ *  13. MEV & Front-Running (5)
+ *  14. Governance Attacks (5)
+ *  15. Cross-Chain & Bridge (5)
+ *  16. NFT-Specific (5)
+ *  17. Solidity/EVM Specific (8)
+ *  18. Unchecked External Interactions (4)
+ *  19. Economic & Game Theory Attacks (5)
+ *  20. Data Privacy & Protocol Integration (5)
+ *  21. Staking, Vaults & Yield (5)
+ *  22. Rounding & Precision (3)
+ *  23. Permit & Approval Edge Cases (3)
+ *  24. Lending & Borrowing Edge Cases (3)
+ *  25. Multi-Hop & Complex DeFi (3)
  */
 
 export interface ExploitPattern {
@@ -1119,7 +1124,7 @@ export const EXPLOIT_PATTERNS: ExploitPattern[] = [
   },
 
   // =========================================================================
-  // Additional High-Impact Patterns (5)
+  // Additional High-Impact Patterns (11)
   // =========================================================================
 
   {

@@ -4,12 +4,20 @@
   "description": "A safety layer for autonomous DeFi agents - MCP server + smart contracts that simulate, scan, and protect on-chain transactions before execution.",
   "type": "module",
   "main": "dist/risk-engine/index.js",
+  "types": "dist/risk-engine/index.d.ts",
   "bin": {
-    "aegis": "dist/index.js"
+    "aegis": "dist/index.js",
+    "aegis-defi": "dist/index.js"
   },
   "exports": {
-    ".": "./dist/risk-engine/index.js",
-    "./server": "./dist/mcp-server/index.js"
+    ".": {
+      "types": "./dist/risk-engine/index.d.ts",
+      "default": "./dist/risk-engine/index.js"
+    },
+    "./server": {
+      "types": "./dist/mcp-server/index.d.ts",
+      "default": "./dist/mcp-server/index.js"
+    }
   },
   "files": [
     "dist/",
@@ -23,7 +31,8 @@
     "compile": "hardhat compile",
     "test:contracts": "hardhat test",
     "test": "vitest run",
-    "demo": "tsx demo/catch-honeypot.ts"
+    "demo": "tsx demo/catch-honeypot.ts",
+    "prepublishOnly": "tsc"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

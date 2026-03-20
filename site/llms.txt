@@ -146,7 +146,7 @@ Built following ethskills (github.com/austintgriffith/ethskills) Ethereum produc
 - EIP-2 s-value malleability check on all ecrecover calls
 - Zero-address validation on all constructors and admin functions
 - Fee math: multiply before divide, basis points, overflow guards
-- Fork tested against real Base mainnet state (106 tests total)
+- 165 tests (42 contract + 123 TypeScript). Fork tested against real Base mainnet state
 - Source verified on Basescan
 
 ## Links
@@ -155,6 +155,5 @@ Built following ethskills (github.com/austintgriffith/ethskills) Ethereum produc
 - GitHub: https://github.com/StanleytheGoat/aegis
 - ethskills reference: https://github.com/austintgriffith/ethskills
 - License: MIT
-- Built for: The Synthesis hackathon (Ethereum Foundation, March 2026)
 - Runtime: Node.js 18+
 - Package: `aegis-defi` on npm

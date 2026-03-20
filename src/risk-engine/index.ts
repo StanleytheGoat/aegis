@@ -30,6 +30,8 @@ export {
   signAttestation,
   signHookAttestation,
   generateAttestationId,
+  type AttestationInput,
+  type SignedAttestation,
 } from "./attester.js";
 export {
   enrichWithSolodit,

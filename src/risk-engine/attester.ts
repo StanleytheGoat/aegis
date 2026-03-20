@@ -16,7 +16,7 @@
 import { keccak256, encodePacked, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-interface AttestationInput {
+export interface AttestationInput {
   agent: Address;
   target: Address;
   selector: Hex;
@@ -25,7 +25,7 @@ interface AttestationInput {
   contractAddress?: Address;
 }
 
-interface SignedAttestation {
+export interface SignedAttestation {
   attestationId: Hex;
   agent: Address;
   target: Address;

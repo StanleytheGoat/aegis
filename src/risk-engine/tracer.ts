@@ -93,6 +93,7 @@ export const WELL_KNOWN_CONTRACTS: Set<string> = new Set([
   "0xdef171fe48cf0115b1d80b88dc8eab59176fee57", // Paraswap V5
   "0xba12222222228d8ba445958a75a0704d566bf2c8", // Balancer V2 Vault
   "0x9008d19f58aabd9ed0d60971565aa8510560ab41", // CoW Protocol Settlement
+  "0xdef1c0ded9bec7f1a1670819833240f027b25eff", // 0x Exchange Proxy
   "0x000000000022d473030f116ddee9f6b43ac78ba3", // Permit2 (Uniswap)
   "0x1f98431c8ad98523631ae4a59f267346ea31f984", // Uniswap V3 Factory
 

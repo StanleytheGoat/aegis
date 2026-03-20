@@ -8,6 +8,8 @@ lib/
 .env.*
 !.env.example
 deployment.json
+hook-deployment.json
+.DS_Store
 *.log
 coverage/
 typechain-types/

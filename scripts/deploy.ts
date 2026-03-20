@@ -74,7 +74,7 @@ async function main() {
   const gatewayHash = await walletClient.deployContract({
     abi: gatewayArtifact.abi,
     bytecode: gatewayArtifact.bytecode as `0x${string}`,
-    args: [account.address], // attester = deployer for now
+    args: [account.address, account.address], // attester = deployer, feeRecipient = deployer (testnet)
   });
 
   console.log(`  TX: ${gatewayHash}`);

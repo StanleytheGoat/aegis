@@ -223,22 +223,19 @@ hook.setPermissiveMode(true);
 
 ## Security Model
 
-Security practices follow [ethskills](https://github.com/austintgriffith/ethskills) Ethereum production best practices. Contracts were audited against the full ethskills security checklist.
+Security practices follow Ethereum security best practices (informed by [ethskills](https://github.com/austintgriffith/ethskills)).
 
 ### Trust assumptions
 
 - The **Aegis attester** is a trusted off-chain entity (the MCP server's signing key)
 - Attestations expire after **5 minutes** to prevent stale approvals
 - Each attestation can only be used **once** to prevent replay attacks
-- The attester can be rotated by the contract owner (zero-address validation enforced on `setAttester`)
+- **Gateway**: the attester can be rotated by the contract owner (zero-address validation enforced on `setAttester`). **Hook**: the attester is **immutable** after deployment.
 - Signatures include **chain ID + contract address** to prevent cross-chain replay
 - **ecrecover** validates against `address(0)` to prevent forged attestations
 - **EIP-2 s-value malleability** check on all signature recovery
-- `withdrawFees` is protected by `nonReentrant`
-- Hook owner is **immutable** after deployment
-- The hook emits events for all state changes: `RiskThresholdUpdated`, `PermissiveModeUpdated`, `AttestationRecorded`
-- A `rescueStuckEth()` function allows recovery of ETH sent directly to the contract via `receive()`
-- Fee recipient uses a **Safe multisig** for secure fee collection
+- **Gateway**: `withdrawFees` is protected by `nonReentrant`. `rescueStuckEth()` recovers ETH sent directly via `receive()`.
+- **Hook**: owner is **immutable** after deployment. Emits events for all state changes: `RiskThresholdUpdated`, `PermissiveModeUpdated`, `AttestationRecorded`.
 
 ### What Aegis catches
 
@@ -268,24 +265,12 @@ Security practices follow [ethskills](https://github.com/austintgriffith/ethskil
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ETHERSCAN_API_KEY` | API key for fetching verified source code | (none) |
+| `ETHERSCAN_API_KEY` | API key for fetching verified source code (Ethereum) | (none) |
+| `BASESCAN_API_KEY` | API key for fetching verified source code (Base) | Falls back to `ETHERSCAN_API_KEY` |
+| `SOLODIT_API_KEY` | Cross-references findings against 50K+ real audit results. Free key at solodit.cyfrin.io | (none, optional) |
 | `ETH_RPC_URL` | Ethereum mainnet RPC endpoint | `https://eth.llamarpc.com` |
 | `BASE_RPC` | Base mainnet RPC endpoint | `https://mainnet.base.org` |
 | `BASE_SEPOLIA_RPC` | Base Sepolia RPC endpoint | `https://sepolia.base.org` |
-
----
-
-## Fees & Economics
-
-The AegisGateway contract charges a small fee per protected transaction:
-
-- **Default fee:** 5 basis points (0.05%)
-- **Minimum fee:** 0.0001 ETH
-- **Maximum fee:** 100 basis points (1%), configurable by owner
-
-Fees are routed to a **Safe multisig** set as the `feeRecipient` at deploy time. Anyone can call `withdrawFees()` (protected by `nonReentrant`) - the funds can only ever go to the multisig. Even if the deployer key is compromised, fees cannot be redirected. This creates a sustainable revenue model that scales with usage - more protected transactions = more fees.
-
-For the Uniswap v4 hook, no additional fee is charged (the standard Uniswap swap fee applies).
 
 ---
 
@@ -312,7 +297,7 @@ For the Uniswap v4 hook, no additional fee is charged (the standard Uniswap swap
 │          │      │  MCP     │      │               │
 │  "swap   │      │  Server  │◄─────│  riskScore:92 │
 │   WETH   │      │          │      │  decision:    │
-│   for    │◄─────│ ⛨ BLOCK │      │  AVOID        │
+│   for    │◄─────│ ⛨ BLOCK │      │  BLOCK        │
 │   SCAM"  │      └──────────┘      └───────────────┘
 │          │
 │  (does   │      Funds saved. Honeypot detected.

@@ -336,8 +336,8 @@ function displayAssessment(label: string, address: string, result: RiskAssessmen
     console.log(`    ${DIM}Expires:   ${result.attestation.expiresAt}${RESET}`);
     console.log(`    ${DIM}Signature: ${result.attestation.signature.slice(0, 18)}...${RESET}`);
     console.log();
-    console.log(`    ${GREEN}This attestation can be submitted on-chain to the AegisSafetyHook${RESET}`);
-    console.log(`    ${GREEN}to authorize the swap through the Uniswap v4 pool.${RESET}`);
+    console.log(`    ${GREEN}This attestation can be submitted on-chain to the AegisGateway${RESET}`);
+    console.log(`    ${GREEN}to authorize the transaction through the safety wrapper.${RESET}`);
     console.log();
   } else if (result.decision !== "BLOCK") {
     console.log(`  ${DIM}Attestation: Not available (no ATTESTER_PRIVATE_KEY configured).${RESET}`);
