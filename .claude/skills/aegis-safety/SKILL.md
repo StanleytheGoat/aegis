@@ -1,6 +1,6 @@
 ---
 name: aegis-safety
-description: DeFi safety analysis skill for Aegis. Triggers on: contract scan, safety check, risk assessment, exploit detection, vulnerability analysis, honeypot, rug pull, token check, simulate transaction, price impact, MEV, sandwich attack, flash loan, oracle manipulation, reentrancy. Provides 22 exploit pattern knowledge and attestation flow for on-chain safety verification.
+description: DeFi safety analysis skill for Aegis. Triggers on: contract scan, safety check, risk assessment, exploit detection, vulnerability analysis, honeypot, rug pull, token check, simulate transaction, price impact, MEV, sandwich attack, flash loan, oracle manipulation, reentrancy. Provides 165 exploit pattern knowledge and attestation flow for on-chain safety verification.
 ---
 
 # Aegis Safety Analysis
@@ -36,5 +36,5 @@ description: DeFi safety analysis skill for Aegis. Triggers on: contract scan, s
 - AegisSafetyHook: 0xaEE532d9707b056f4d0939b91D4031298F7340C0
 - Fee Recipient (Safe): 0x3cfFEcfdBC7cE87067990b2863dfBBfD1cfD5952
 
-See references/PATTERNS.md for all 22 exploit detection patterns.
+See references/PATTERNS.md for all 165 exploit detection patterns.
 See references/CASE-STUDIES.md for real-world incidents Aegis would prevent.

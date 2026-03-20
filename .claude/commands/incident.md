@@ -14,7 +14,7 @@ Document a DeFi security incident and analyze how Aegis would have prevented it.
    - What was the root cause?
 
 2. Map to Aegis patterns:
-   - Which of our 22 exploit patterns would have caught this?
+   - Which of our 165 exploit patterns would have caught this?
    - Would scan_contract detect the vulnerability?
    - Would simulate_transaction flag the malicious transaction?
    - Would the Hook have blocked it?

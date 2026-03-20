@@ -15,7 +15,7 @@ Research a target company and generate a tailored pitch for Aegis integration.
    - Who are the key people to contact?
 
 2. Identify how Aegis helps them specifically:
-   - Which of our 22 exploit patterns are relevant to their protocol type?
+   - Which of our 165 exploit patterns are relevant to their protocol type?
    - Would they benefit more from the MCP server (agent safety) or the Hook (pool safety)?
    - What case studies are relevant? (Aave $50M, Cork $11M, Moonwell $1.78M)
 

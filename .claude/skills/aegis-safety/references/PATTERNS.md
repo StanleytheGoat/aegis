@@ -1,6 +1,6 @@
 # Aegis Exploit Detection Patterns
 
-22 patterns across 8 categories, sourced from `src/risk-engine/patterns.ts`.
+165 patterns across 8 categories, sourced from `src/risk-engine/patterns.ts`.
 
 ## Pattern Reference
 

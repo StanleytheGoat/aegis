@@ -53,7 +53,7 @@ Aegis Risk Assessment
 ## What's in the box
 
 **MCP Server** (TypeScript)
-- `scan_contract` - pattern matching against 22 known exploit types
+- `scan_contract` - pattern matching against 165 known exploit types
 - `simulate_transaction` - dry-run on a forked chain
 - `check_token` - anti-honeypot checks (sellability, concentrated holdings)
 - `assess_risk` - all of the above combined into one call. Returns a signed attestation for ALLOW/WARN decisions (falls back to MCP-only mode if no attester key configured)
@@ -103,7 +103,7 @@ See the full list in [.claude/skills/aegis-safety/references/PATTERNS.md](.claud
 
 ## v0.2.0 - What's New
 
-- **22 exploit patterns** (up from 12) - covers metamorphic contracts, oracle manipulation, MEV sandwich, and more
+- **165 exploit patterns** (up from 12) - covers metamorphic contracts, oracle manipulation, MEV sandwich, and more
 - **Agent Skills** - installable skill files for Claude Code with progressive disclosure and trigger-based activation
 - **Slash commands** - `/scan`, `/status`, `/pitch`, `/incident` for common operations
 - **Pre-push security hook** - blocks git pushes containing leaked secrets

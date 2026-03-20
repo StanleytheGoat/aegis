@@ -6,7 +6,7 @@
 
 Aegis protects autonomous AI agents from DeFi exploits. It sits between the agent's decision to trade and the actual on-chain execution, providing three layers of defense:
 
-1. **Static Analysis** - Scans contract source code and bytecode against 22 known exploit patterns (honeypots, rug pulls, reentrancy, fake ownership renounce, etc.)
+1. **Static Analysis** - Scans contract source code and bytecode against 165 known exploit patterns (honeypots, rug pulls, reentrancy, fake ownership renounce, etc.)
 2. **Transaction Simulation** - Forks the target chain and simulates the transaction to detect reverts, abnormal gas usage, and hidden state changes before any real funds move.
 3. **On-Chain Enforcement** - AegisGateway smart contract and Uniswap v4 hook that enforce safety checks at the protocol level, with an immutable cold wallet for fee collection.
 
