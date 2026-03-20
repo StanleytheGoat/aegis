@@ -1161,6 +1161,65 @@
     </div>
   </section>
 
+  <!-- ========== Case Studies ========== -->
+  <section id="case-studies" style="border-top: 1px solid var(--border);">
+    <div class="container">
+      <span class="section-label fade-in">Real-World Impact</span>
+      <h2 class="section-title fade-in">$62M in preventable losses</h2>
+      <p class="section-subtitle fade-in">
+        Recent incidents that Aegis would have caught before execution.
+      </p>
+
+      <div class="steps-grid" style="margin-top: 3rem;">
+        <div class="step-card fade-in" style="border-left: 3px solid var(--red);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-family: var(--mono); font-size: 0.75rem; padding: 0.125rem 0.5rem; background: rgba(239, 68, 68, 0.15); color: var(--red); border-radius: 4px;">$50M LOST</span>
+          </div>
+          <h3>Aave Swap Disaster</h3>
+          <p style="margin-bottom: 0.75rem;">March 2026 - A whale swapped $50M USDT for AAVE tokens. Routed through a pool with only $73K liquidity. MEV bots extracted $34M.</p>
+          <p style="font-size: 0.8125rem; color: var(--accent);"><strong>Aegis catches it:</strong> simulate_transaction flags extreme price impact. Agent gets BLOCK decision.</p>
+        </div>
+
+        <div class="step-card fade-in" style="border-left: 3px solid var(--orange);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-family: var(--mono); font-size: 0.75rem; padding: 0.125rem 0.5rem; background: rgba(245, 158, 11, 0.15); color: var(--orange); border-radius: 4px;">$11M EXPLOIT</span>
+          </div>
+          <h3>Cork Protocol Hack</h3>
+          <p style="margin-bottom: 0.75rem;">May 2025 - Missing access controls in CorkHook.beforeSwap() on Uniswap v4. Attacker bypassed all safety checks.</p>
+          <p style="font-size: 0.8125rem; color: var(--accent);"><strong>Aegis catches it:</strong> AegisSafetyHook requires valid attestation before any swap executes.</p>
+        </div>
+
+        <div class="step-card fade-in" style="border-left: 3px solid var(--yellow);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-family: var(--mono); font-size: 0.75rem; padding: 0.125rem 0.5rem; background: rgba(234, 179, 8, 0.12); color: var(--yellow); border-radius: 4px;">$1.78M DRAINED</span>
+          </div>
+          <h3>Moonwell Oracle Attack</h3>
+          <p style="margin-bottom: 0.75rem;">Feb 2026 - Oracle misconfiguration on Base priced cbETH incorrectly. Attacker exploited the price discrepancy.</p>
+          <p style="font-size: 0.8125rem; color: var(--accent);"><strong>Aegis catches it:</strong> Pattern 17 (Oracle Manipulation) detects inline reserve-based pricing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Architecture ========== -->
+  <section id="architecture">
+    <div class="container">
+      <span class="section-label fade-in">Architecture</span>
+      <h2 class="section-title fade-in">End-to-end safety pipeline</h2>
+
+      <div class="fade-in" style="margin-top: 3rem; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow-x: auto;">
+        <pre style="font-family: var(--mono); font-size: 0.8125rem; line-height: 1.8; color: var(--text-muted); text-align: center; white-space: pre;">
+<span style="color: var(--text);">AI Agent</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: var(--accent);">MCP Server</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #c792ea;">Risk Engine</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #ffcb6b;">Attester</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #82aaff;">Gateway</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #ff6b9d;">Pool</span>
+<span style="color: var(--text-dim);">  Claude         4 tools          22 patterns       Signs           Verifies        Executes
+  GPT            scan_contract    Static analysis   attestation     + 5 bps fee     swap
+  Any agent      simulate_tx      Bytecode check    (chainId-bound) Safe multisig   Uniswap v4
+                 check_token      Fork simulation
+                 assess_risk</span>
+        </pre>
+      </div>
+    </div>
+  </section>
+
   <!-- ========== Footer ========== -->
   <footer>
     <div class="container">
@@ -1177,6 +1236,8 @@
           <li><a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener">GitHub</a></li>
           <li><a href="https://github.com/StanleytheGoat/aegis#readme" target="_blank" rel="noopener">Docs</a></li>
           <li><a href="https://github.com/StanleytheGoat/aegis/issues" target="_blank" rel="noopener">Issues</a></li>
+          <li><a href="https://www.npmjs.com/package/aegis-defi" target="_blank" rel="noopener">npm</a></li>
+          <li><a href="/llms.txt">llms.txt</a></li>
         </ul>
 
         <span class="footer-license">MIT License</span>
