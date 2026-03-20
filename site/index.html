@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aegis - DeFi Safety Layer for Autonomous AI Agents</title>
   <meta name="description" content="Aegis scans contracts, simulates transactions, and enforces on-chain protection before AI agents execute DeFi trades. MCP server for Claude, GPT, and any autonomous agent.">
@@ -13,7 +13,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Aegis - DeFi Safety Layer for Autonomous AI Agents">
-  <meta property="og:description" content="Scan contracts for 22 exploit patterns, simulate transactions on forked chains, and enforce safety on-chain. One MCP command to protect your agent.">
+  <meta property="og:description" content="Scan contracts for exploit patterns, simulate transactions on forked chains, and enforce safety on-chain. One MCP command to protect your agent.">
   <meta property="og:url" content="https://aegis-defi.netlify.app">
   <meta property="og:site_name" content="Aegis">
   <meta property="og:locale" content="en_US">
@@ -24,11 +24,11 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Aegis - DeFi Safety Layer for Autonomous AI Agents">
-  <meta name="twitter:description" content="Scan contracts for 22 exploit patterns, simulate transactions on forked chains, and enforce safety on-chain.">
+  <meta name="twitter:description" content="Scan contracts for exploit patterns, simulate transactions on forked chains, and enforce safety on-chain.">
   <meta name="twitter:image" content="https://aegis-defi.netlify.app/og.png">
 
-  <!-- Favicon (inline SVG shield) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z' fill='%23111' stroke='%23c9982a' stroke-width='2'/></svg>">
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z' fill='%23070d1f' stroke='%23ffe792' stroke-width='2'/></svg>">
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
@@ -42,1195 +42,715 @@
     "url": "https://aegis-defi.netlify.app",
     "license": "https://opensource.org/licenses/MIT",
     "programmingLanguage": ["TypeScript", "Solidity"],
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "author": {
-      "@type": "Organization",
-      "name": "Aegis"
-    }
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "Aegis" }
   }
   </script>
 
-  <!-- Fonts: Plus Jakarta Sans (not Inter) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Tailwind (matching Stitch config exactly) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed-dim": "#9699ff",
+            "on-error-container": "#ffa8a3",
+            "inverse-on-surface": "#4f5469",
+            "on-primary-fixed-variant": "#665500",
+            "on-tertiary-container": "#000000",
+            "surface-container-high": "#171f36",
+            "surface-variant": "#1c253e",
+            "background": "#070d1f",
+            "primary-dim": "#efc900",
+            "on-error": "#490006",
+            "tertiary-fixed": "#a6a9ff",
+            "tertiary": "#9093ff",
+            "outline-variant": "#41475b",
+            "surface-container": "#11192e",
+            "error-dim": "#d7383b",
+            "inverse-surface": "#faf8ff",
+            "on-surface": "#dfe4fe",
+            "on-surface-variant": "#a5aac2",
+            "surface-container-highest": "#1c253e",
+            "on-secondary-fixed-variant": "#00586d",
+            "on-primary-container": "#5b4b00",
+            "secondary-container": "#00677f",
+            "surface-container-low": "#0c1326",
+            "on-secondary-container": "#eef9ff",
+            "secondary": "#00cffc",
+            "surface-tint": "#ffe792",
+            "primary": "#ffe792",
+            "secondary-dim": "#00c0ea",
+            "secondary-fixed-dim": "#37d4ff",
+            "outline": "#6f758b",
+            "surface-dim": "#070d1f",
+            "on-background": "#dfe4fe",
+            "surface": "#070d1f",
+            "primary-fixed": "#ffd709",
+            "on-primary-fixed": "#453900",
+            "on-tertiary-fixed": "#050061",
+            "tertiary-dim": "#6063ee",
+            "inverse-primary": "#705e00",
+            "on-tertiary-fixed-variant": "#1e18b2",
+            "on-secondary": "#004050",
+            "secondary-fixed": "#80deff",
+            "on-primary": "#655400",
+            "tertiary-container": "#7073ff",
+            "error": "#ff716c",
+            "surface-container-lowest": "#000000",
+            "surface-bright": "#222b47",
+            "error-container": "#9f0519",
+            "on-tertiary": "#080079",
+            "primary-fixed-dim": "#efc900",
+            "on-secondary-fixed": "#003a48",
+            "primary-container": "#ffd709"
+          },
+          fontFamily: {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Inter"],
+            "mono": ["JetBrains Mono", "Menlo", "monospace"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1.5rem",
+            "3xl": "2rem",
+            "4xl": "2.5rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
 
   <style>
-    /* ========== Reset & Tokens ========== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: #070d1f; color: #dfe4fe; }
+    h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    .glass-card { background: rgba(17, 25, 46, 0.6); backdrop-filter: blur(20px); }
+    .glow-gold { filter: drop-shadow(0 0 15px rgba(255, 231, 146, 0.3)); }
+    .glow-cyan { filter: drop-shadow(0 0 15px rgba(0, 207, 252, 0.2)); }
 
-    :root {
-      /* 60-30-10 color system */
-      /* 60%: base surfaces */
-      --bg: #111113;
-      --bg-raised: #19191d;
-      --bg-inset: #0e0e10;
+    /* Reveal animation */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-      /* 30%: borders, muted text, secondary elements */
-      --border: #27272e;
-      --border-hover: #35353e;
-      --text: #e4e2df;
-      --text-secondary: #9d9a94;
-      --text-tertiary: #5e5c57;
+    /* Ping animation for status dot */
+    @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
 
-      /* 10%: accent -- warm amber, not neon */
-      --accent: #c9982a;
-      --accent-muted: rgba(201, 152, 42, 0.14);
-      --accent-text: #dbb544;
+    /* Code syntax */
+    .c-kw { color: #c792ea; }
+    .c-str { color: #c3e88d; }
+    .c-fn { color: #82aaff; }
+    .c-cm { color: #546e7a; }
+    .c-type { color: #dbb544; }
+    .c-op { color: #89ddff; }
 
-      /* Semantic */
-      --critical: #d45550;
-      --critical-muted: rgba(212, 85, 80, 0.14);
-      --high: #c97a2a;
-      --high-muted: rgba(201, 122, 42, 0.14);
-      --medium: #b0a030;
-      --medium-muted: rgba(176, 160, 48, 0.12);
-      --info: #5b82c4;
-      --info-muted: rgba(91, 130, 196, 0.12);
-
-      /* Typography */
-      --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      --mono: 'IBM Plex Mono', 'Menlo', monospace;
-
-      /* Spacing: 4pt grid */
-      --sp-1: 0.25rem;   /* 4px */
-      --sp-2: 0.5rem;    /* 8px */
-      --sp-3: 0.75rem;   /* 12px */
-      --sp-4: 1rem;      /* 16px */
-      --sp-5: 1.25rem;   /* 20px */
-      --sp-6: 1.5rem;    /* 24px */
-      --sp-8: 2rem;      /* 32px */
-      --sp-10: 2.5rem;   /* 40px */
-      --sp-12: 3rem;     /* 48px */
-      --sp-16: 4rem;     /* 64px */
-      --sp-20: 5rem;     /* 80px */
-      --sp-24: 6rem;     /* 96px */
-
-      /* Motion: ease-out-quart, never generic ease */
-      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
-      --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
-
-      /* Radii */
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-    }
-
-    html { scroll-behavior: smooth; font-size: 16px; }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-    }
-
-    a { color: var(--accent-text); text-decoration: none; transition: color 0.2s var(--ease-out); }
-    a:hover { color: var(--text); }
-
-    /* ========== Layout ========== */
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 var(--sp-6);
-    }
-
-    section { padding: var(--sp-24) 0; }
-
-    /* ========== Fade-in ========== */
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ========== Navigation ========== */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      padding: var(--sp-4) 0;
-      background: rgba(17, 17, 19, 0.92);
-      border-bottom: 1px solid var(--border);
-    }
-
-    nav .wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-2);
-      font-weight: 700;
-      font-size: 1.0625rem;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-
-    .nav-mark {
-      width: 26px;
-      height: 26px;
-      background: var(--accent);
-      border-radius: var(--radius-sm);
-      display: grid;
-      place-items: center;
-    }
-
-    .nav-mark svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-8);
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: color 0.2s var(--ease-out);
-    }
-    .nav-links a:hover { color: var(--text); }
-
-    .nav-gh {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-2);
-      padding: var(--sp-2) var(--sp-4);
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text) !important;
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: border-color 0.2s var(--ease-out);
-    }
-    .nav-gh:hover { border-color: var(--border-hover); }
-    .nav-gh svg { width: 16px; height: 16px; }
-
-    .nav-toggle {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: var(--sp-2);
-    }
-    .nav-toggle span {
-      display: block;
-      width: 20px;
-      height: 2px;
-      background: var(--text-secondary);
-      margin: 4px 0;
-      transition: 0.25s var(--ease-out);
-    }
-
-    /* ========== Hero -- left-aligned, not centered ========== */
-    .hero {
-      padding: 10rem 0 var(--sp-24);
-      position: relative;
-    }
-
-    .hero-inner {
-      max-width: 680px;
-    }
-
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-2);
-      padding: var(--sp-1) var(--sp-3);
-      background: var(--accent-muted);
-      border: 1px solid rgba(201, 152, 42, 0.2);
-      border-radius: 100px;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--accent-text);
-      margin-bottom: var(--sp-6);
-    }
-
-    .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 3.75rem);
-      font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.03em;
-      margin-bottom: var(--sp-6);
-      color: var(--text);
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--accent-text);
-    }
-
-    .hero-sub {
-      font-size: 1.1875rem;
-      color: var(--text-secondary);
-      max-width: 540px;
-      line-height: 1.65;
-      margin-bottom: var(--sp-10);
-    }
-
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-4);
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-2);
-      padding: var(--sp-3) var(--sp-6);
-      border-radius: var(--radius-md);
-      font-size: 0.9375rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.15s var(--ease-out), box-shadow 0.25s var(--ease-out);
-    }
-    .btn:hover { transform: translateY(-1px); }
-
-    .btn-accent {
-      background: var(--accent);
-      color: #111113;
-    }
-    .btn-accent:hover { box-shadow: 0 4px 20px rgba(201, 152, 42, 0.25); color: #111113; }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover { border-color: var(--border-hover); }
-
-    .hero-cmd {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-3);
-      margin-top: var(--sp-8);
-      padding: var(--sp-3) var(--sp-5);
-      background: var(--bg-inset);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-family: var(--mono);
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: border-color 0.2s var(--ease-out);
-    }
-    .hero-cmd:hover { border-color: var(--border-hover); }
-    .hero-cmd code { color: var(--accent-text); }
-    .hero-cmd .copy-label {
-      font-size: 0.75rem;
-      color: var(--text-tertiary);
-      padding: 0.125rem var(--sp-2);
-      background: var(--border);
-      border-radius: 3px;
-      font-family: var(--font);
-    }
-
-    /* ========== Section headers ========== */
-    .sh-label {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent-text);
-      margin-bottom: var(--sp-3);
-      display: block;
-    }
-
-    .sh-title {
-      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
-      font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: var(--sp-4);
-      letter-spacing: -0.02em;
-    }
-
-    .sh-desc {
-      font-size: 1.0625rem;
-      color: var(--text-secondary);
-      max-width: 560px;
-      line-height: 1.65;
-    }
-
-    /* ========== How It Works (horizontal pipeline, not identical cards) ========== */
-    .pipeline {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--sp-6);
-      margin-top: var(--sp-12);
-    }
-
-    .pipeline-step {
-      padding: var(--sp-8);
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      position: relative;
-      transition: border-color 0.25s var(--ease-out);
-    }
-    .pipeline-step:hover { border-color: var(--border-hover); }
-
-    .pipeline-num {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-tertiary);
-      letter-spacing: 0.06em;
-      margin-bottom: var(--sp-5);
-    }
-
-    /* Each step has different top accent border */
-    .pipeline-step:nth-child(1) { border-top: 2px solid var(--accent); }
-    .pipeline-step:nth-child(2) { border-top: 2px solid var(--info); }
-    .pipeline-step:nth-child(3) { border-top: 2px solid var(--critical); }
-
-    .pipeline-step h3 {
-      font-size: 1.1875rem;
-      font-weight: 700;
-      margin-bottom: var(--sp-3);
-      letter-spacing: -0.01em;
-    }
-
-    .pipeline-step p {
-      color: var(--text-secondary);
-      font-size: 0.9375rem;
-      line-height: 1.6;
-    }
-
-    /* ========== Exploit Patterns (2-column varied layout) ========== */
-    .patterns-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: var(--sp-8);
-      flex-wrap: wrap;
-    }
-
-    .patterns-count {
-      font-family: var(--mono);
-      font-size: 0.8125rem;
-      color: var(--text-tertiary);
-      padding: var(--sp-1) var(--sp-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      white-space: nowrap;
-    }
-
-    .patterns-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--sp-3);
-      margin-top: var(--sp-10);
-    }
-
-    .pat {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-3);
-      padding: var(--sp-3) var(--sp-4);
-      border-radius: var(--radius-md);
-      transition: background 0.2s var(--ease-out);
-    }
-    .pat:hover { background: var(--bg-raised); }
-
-    .pat-sev {
-      flex-shrink: 0;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-    .pat-sev.crit { background: var(--critical); }
-    .pat-sev.high { background: var(--high); }
-    .pat-sev.med { background: var(--medium); }
-
-    .pat-name {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .pat-desc {
-      font-size: 0.8125rem;
-      color: var(--text-tertiary);
-      margin-left: auto;
-      text-align: right;
-      padding-left: var(--sp-4);
-    }
-
-    .patterns-more {
-      display: block;
-      margin-top: var(--sp-6);
-      text-align: center;
-      font-size: 0.875rem;
-      color: var(--text-tertiary);
-    }
-
-    /* ========== Integration (tabs + code) ========== */
-    .int-tabs {
-      display: flex;
-      gap: var(--sp-1);
-      margin-top: var(--sp-10);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .int-tab {
-      padding: var(--sp-3) var(--sp-5);
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-secondary);
-      font-family: var(--font);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
-      margin-bottom: -1px;
-    }
-    .int-tab:hover { color: var(--text); }
-    .int-tab.active { color: var(--accent-text); border-bottom-color: var(--accent); }
-
+    /* Tab system */
     .int-panel { display: none; }
     .int-panel.active { display: block; }
-
-    .codeblock {
-      background: var(--bg-inset);
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-      padding: var(--sp-6);
-      overflow-x: auto;
-    }
-
-    .codeblock pre {
-      font-family: var(--mono);
-      font-size: 0.8125rem;
-      line-height: 1.8;
-      color: var(--text-secondary);
-    }
-
-    .codeblock .file-label {
-      font-family: var(--mono);
-      font-size: 0.6875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-tertiary);
-      margin-bottom: var(--sp-4);
-      padding-bottom: var(--sp-3);
-      border-bottom: 1px solid var(--border);
-    }
-
-    /* Syntax */
-    .s-kw { color: #c792ea; }
-    .s-str { color: #c3e88d; }
-    .s-cm { color: #546e7a; }
-    .s-fn { color: #82aaff; }
-    .s-type { color: #dbb544; }
-    .s-op { color: #89ddff; }
-    .s-num { color: #f78c6c; }
-
-    /* ========== On-Chain (asymmetric 2-col layout) ========== */
-    .chain-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: var(--sp-6);
-      margin-top: var(--sp-10);
-    }
-
-    .chain-card {
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: var(--sp-8);
-    }
-
-    .chain-card h3 {
-      font-size: 1.125rem;
-      font-weight: 700;
-      margin-bottom: var(--sp-2);
-      display: flex;
-      align-items: center;
-      gap: var(--sp-2);
-    }
-
-    .chain-badge {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      padding: 0.125rem var(--sp-2);
-      border-radius: 3px;
-    }
-
-    .badge-base { background: rgba(0, 82, 255, 0.15); color: #5b8def; }
-    .badge-v4 { background: rgba(255, 0, 122, 0.12); color: #ff6b9d; }
-
-    .chain-card p {
-      color: var(--text-secondary);
-      font-size: 0.9375rem;
-      line-height: 1.6;
-      margin-bottom: var(--sp-5);
-    }
-
-    .chain-meta {
-      display: flex;
-      gap: var(--sp-3);
-      padding: var(--sp-3) var(--sp-4);
-      background: var(--bg-inset);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 0.8125rem;
-      margin-bottom: var(--sp-2);
-    }
-
-    .chain-meta .lbl {
-      color: var(--text-tertiary);
-      min-width: 72px;
-    }
-
-    .chain-meta .val { color: var(--text-secondary); word-break: break-all; }
-
-    /* ========== Case Studies (stacked, not grid) ========== */
-    .cases {
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-4);
-      margin-top: var(--sp-10);
-    }
-
-    .case-row {
-      display: grid;
-      grid-template-columns: 140px 1fr 1fr;
-      gap: var(--sp-6);
-      padding: var(--sp-6);
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      align-items: start;
-      transition: border-color 0.25s var(--ease-out);
-    }
-    .case-row:hover { border-color: var(--border-hover); }
-
-    .case-amount {
-      font-family: var(--mono);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      padding: var(--sp-1) var(--sp-3);
-      border-radius: var(--radius-sm);
-      display: inline-block;
-    }
-
-    .case-amount.loss-crit { background: var(--critical-muted); color: var(--critical); }
-    .case-amount.loss-high { background: var(--high-muted); color: var(--high); }
-    .case-amount.loss-med { background: var(--medium-muted); color: var(--medium); }
-
-    .case-body h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: var(--sp-1);
-    }
-
-    .case-body p {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    .case-catch {
-      font-size: 0.8125rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    .case-catch strong {
-      color: var(--accent-text);
-      font-weight: 600;
-    }
-
-    /* ========== Architecture (horizontal flow) ========== */
-    .arch-flow {
-      margin-top: var(--sp-10);
-      padding: var(--sp-8) var(--sp-6);
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow-x: auto;
-    }
-
-    .arch-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0;
-      min-width: 700px;
-    }
-
-    .arch-node {
-      text-align: center;
-      flex: 1;
-      min-width: 90px;
-    }
-
-    .arch-node-title {
-      font-size: 0.8125rem;
-      font-weight: 700;
-      margin-bottom: var(--sp-2);
-      letter-spacing: -0.01em;
-    }
-
-    .arch-node-detail {
-      font-size: 0.75rem;
-      color: var(--text-tertiary);
-      line-height: 1.65;
-    }
-
-    .arch-arrow {
-      color: var(--text-tertiary);
-      font-size: 1.125rem;
-      padding-top: 0.125rem;
-      flex-shrink: 0;
-    }
-
-    /* ========== Footer ========== */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: var(--sp-12) 0;
-    }
-
-    .foot-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: var(--sp-6);
-    }
-
-    .foot-brand {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-2);
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-size: 0.9375rem;
-    }
-
-    .foot-brand .nav-mark {
-      width: 22px;
-      height: 22px;
-    }
-    .foot-brand .nav-mark svg { width: 13px; height: 13px; }
-
-    .foot-links {
-      display: flex;
-      gap: var(--sp-8);
-      list-style: none;
-    }
-
-    .foot-links a {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
-    .foot-links a:hover { color: var(--text); }
-
-    .foot-license {
-      font-size: 0.8125rem;
-      color: var(--text-tertiary);
-    }
-
-    /* ========== Responsive ========== */
-    @media (max-width: 900px) {
-      .pipeline { grid-template-columns: 1fr; }
-      .patterns-list { grid-template-columns: 1fr; }
-      .chain-grid { grid-template-columns: 1fr; }
-      .case-row { grid-template-columns: 1fr; }
-      .case-amount { margin-bottom: var(--sp-2); }
-    }
-
-    @media (max-width: 640px) {
-      section { padding: var(--sp-16) 0; }
-      .hero { padding: 7rem 0 var(--sp-16); }
-      .hero h1 { font-size: 2rem; }
-      .nav-links { display: none; }
-      .nav-toggle { display: block; }
-      .nav-links.open {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(17, 17, 19, 0.97);
-        padding: var(--sp-6);
-        border-bottom: 1px solid var(--border);
-        gap: var(--sp-4);
-      }
-      .hero-cmd { flex-direction: column; gap: var(--sp-2); }
-      .pat-desc { display: none; }
-    }
   </style>
 </head>
-<body>
 
-  <!-- ========== Nav ========== -->
-  <nav>
-    <div class="wrap">
-      <a href="#" class="nav-brand">
-        <span class="nav-mark">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#111113"/>
-            <path d="M9 12l2 2 4-4" stroke="#111113" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        Aegis
+<body class="selection:bg-primary selection:text-on-primary-fixed">
+
+  <!-- ========== Nav (Glass Dock) ========== -->
+  <nav class="fixed top-0 w-full z-50 bg-surface-dim/70 backdrop-blur-xl">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto relative">
+      <a href="#" class="flex items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="glow-gold">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+          <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-black tracking-tight text-on-surface font-headline">Aegis</span>
       </a>
 
-      <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="hidden md:flex items-center gap-10">
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest" href="#how-it-works">How It Works</a>
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest" href="#patterns">Patterns</a>
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest" href="#integration">Integration</a>
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest" href="#onchain">On-Chain</a>
+      </div>
 
-      <ul class="nav-links">
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#patterns">Patterns</a></li>
-        <li><a href="#integration">Integration</a></li>
-        <li><a href="#onchain">On-Chain</a></li>
-        <li>
-          <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener" class="nav-gh">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-            GitHub
-          </a>
-        </li>
-      </ul>
+      <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener"
+         class="bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed px-5 py-2 rounded-full font-bold text-sm transition-transform hover:scale-105 active:scale-95 flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+
+      <div class="bg-outline-variant/10 h-px w-full absolute bottom-0 left-0"></div>
     </div>
   </nav>
 
-  <!-- ========== Hero ========== -->
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-inner">
-        <div class="hero-tag reveal">
-          Built for The Synthesis &middot; Ethereum Foundation &middot; March 2026
+  <main>
+
+    <!-- ========== Hero ========== -->
+    <section class="relative pt-48 pb-32 px-8 overflow-hidden">
+      <!-- Ambient glows -->
+      <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+      <div class="absolute top-1/2 -right-24 w-96 h-96 bg-secondary/10 rounded-full blur-[120px]"></div>
+
+      <div class="max-w-screen-xl mx-auto text-center relative z-10">
+        <!-- Status badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container-low mb-8 reveal">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+          </span>
+          <span class="text-secondary text-[10px] font-label uppercase tracking-[0.2em]">MCP-native safety layer for autonomous agents</span>
         </div>
 
-        <h1 class="reveal">
-          Stop your AI agent from<br><em>getting rugged</em>
+        <h1 class="text-5xl md:text-8xl font-extrabold tracking-tight mb-8 leading-[0.9] text-on-surface font-headline reveal">
+          Stop your AI agent<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-fixed to-primary-dim">from getting rugged</span>
         </h1>
 
-        <p class="hero-sub reveal">
+        <p class="text-on-surface-variant text-lg md:text-xl max-w-2xl mx-auto mb-12 font-body font-light leading-relaxed reveal">
           AI agents trading on-chain can't tell safe contracts from scams. Aegis checks every contract, simulates every trade, and blocks dangerous transactions before your agent loses funds.
         </p>
 
-        <div class="hero-actions reveal">
-          <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener" class="btn btn-accent">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 reveal">
+          <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener"
+             class="px-10 py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-bold rounded-full text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
             View on GitHub
           </a>
-          <a href="#integration" class="btn btn-outline">Get Started</a>
+          <a href="#integration" class="px-10 py-4 glass-card border border-outline-variant/30 text-on-surface font-medium rounded-full text-lg hover:bg-surface-variant transition-all">
+            Get Started
+          </a>
         </div>
 
-        <div class="hero-cmd reveal" onclick="navigator.clipboard.writeText('npx aegis-defi').then(()=>{this.querySelector('.copy-label').textContent='Copied!'})">
-          <span style="color: var(--text-tertiary);">$</span>
-          <code>npx aegis-defi</code>
-          <span class="copy-label">Click to copy</span>
+        <!-- CLI command -->
+        <div class="inline-flex items-center gap-3 mt-10 px-6 py-3 bg-surface-container-lowest/40 border border-outline-variant/20 rounded-xl font-mono text-sm cursor-pointer hover:border-outline-variant/40 transition-all reveal"
+             onclick="navigator.clipboard.writeText('npx aegis-defi').then(()=>{this.querySelector('.copy-hint').textContent='Copied!'})">
+          <span class="text-outline">$</span>
+          <code class="text-primary">npx aegis-defi</code>
+          <span class="copy-hint text-[11px] text-outline-variant px-2 py-0.5 bg-surface-container rounded font-body">Click to copy</span>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== How It Works ========== -->
-  <section id="how-it-works">
-    <div class="wrap">
-      <span class="sh-label reveal">How It Works</span>
-      <h2 class="sh-title reveal">Three layers of protection</h2>
-      <p class="sh-desc reveal">
-        Your agent wants to swap tokens. Here's what happens before any funds move.
-      </p>
-
-      <div class="pipeline">
-        <div class="pipeline-step reveal">
-          <span class="pipeline-num">STEP 01</span>
-          <h3>Connect</h3>
-          <p>One command adds Aegis to Claude, GPT, or any MCP-compatible agent. Your agent gets four safety tools it can call before every trade.</p>
-        </div>
-        <div class="pipeline-step reveal">
-          <span class="pipeline-num">STEP 02</span>
-          <h3>Scan & Simulate</h3>
-          <p>Is this contract a honeypot? Will this swap get front-run? Aegis checks the contract against 22 exploit patterns, then simulates the trade on a forked chain. No real funds at risk.</p>
-        </div>
-        <div class="pipeline-step reveal">
-          <span class="pipeline-num">STEP 03</span>
-          <h3>Enforce On-Chain</h3>
-          <p>Even if software fails, the blockchain doesn't. AegisGateway verifies a signed safety attestation before executing any DeFi call. Pools with AegisSafetyHook installed add a second layer your agent can trust.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== What It Catches ========== -->
-  <section id="patterns" style="border-top: 1px solid var(--border);">
-    <div class="wrap">
-      <div class="patterns-header">
-        <div>
-          <span class="sh-label reveal">What It Catches</span>
-          <h2 class="sh-title reveal">Known scams, caught instantly</h2>
-          <p class="sh-desc reveal">
-            Before your agent touches a contract, Aegis checks it against known attack patterns in both source code and bytecode.
-          </p>
-        </div>
-        <span class="patterns-count reveal">22 patterns</span>
-      </div>
-
-      <div class="patterns-list">
-        <div class="pat reveal">
-          <span class="pat-sev crit"></span>
-          <span class="pat-name">Asymmetric Buy/Sell Tax</span>
-          <span class="pat-desc">Traps funds with disproportionate sell tax</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev crit"></span>
-          <span class="pat-name">Sell Pause Mechanism</span>
-          <span class="pat-desc">Owner can disable selling entirely</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev crit"></span>
-          <span class="pat-name">Fake Ownership Renounce</span>
-          <span class="pat-desc">Hidden owner retains full control</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev crit"></span>
-          <span class="pat-name">Reentrancy Vulnerability</span>
-          <span class="pat-desc">External call before state update</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev high"></span>
-          <span class="pat-name">Hidden Max Sell Amount</span>
-          <span class="pat-desc">Prevents large position exits</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev high"></span>
-          <span class="pat-name">Unrestricted Minting</span>
-          <span class="pat-desc">Unlimited token minting capability</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev high"></span>
-          <span class="pat-name">Hidden Admin Functions</span>
-          <span class="pat-desc">Non-standard access control patterns</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev high"></span>
-          <span class="pat-name">Flash Loan Vulnerability</span>
-          <span class="pat-desc">Manipulable price oracles</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev high"></span>
-          <span class="pat-name">Permit/Approval Phishing</span>
-          <span class="pat-desc">Approval-draining mechanics</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev med"></span>
-          <span class="pat-name">Unlimited Approval</span>
-          <span class="pat-desc">Requires dangerous max approvals</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev med"></span>
-          <span class="pat-name">Blacklist Mechanism</span>
-          <span class="pat-desc">Can block addresses from transacting</span>
-        </div>
-        <div class="pat reveal">
-          <span class="pat-sev med"></span>
-          <span class="pat-name">Upgradeable Proxy</span>
-          <span class="pat-desc">Logic can change post-deployment</span>
-        </div>
-      </div>
-
-      <span class="patterns-more reveal">
-        + 10 more patterns including delegatecall injection, oracle manipulation, gas griefing, and cross-chain replay.
-        <a href="https://github.com/StanleytheGoat/aegis#exploit-patterns" target="_blank" rel="noopener">See all</a>
-      </span>
-    </div>
-  </section>
-
-  <!-- ========== Integration ========== -->
-  <section id="integration">
-    <div class="wrap">
-      <span class="sh-label reveal">Integration</span>
-      <h2 class="sh-title reveal">Add it in 30 seconds</h2>
-      <p class="sh-desc reveal">
-        Aegis is an MCP server. If your agent speaks MCP, it already works.
-      </p>
-
-      <div class="reveal">
-        <div class="int-tabs">
-          <button class="int-tab active" onclick="switchTab(event, 'panel-cli')">Claude CLI</button>
-          <button class="int-tab" onclick="switchTab(event, 'panel-json')">MCP Config</button>
-          <button class="int-tab" onclick="switchTab(event, 'panel-code')">Programmatic</button>
-        </div>
-
-        <div id="panel-cli" class="int-panel active">
-          <div class="codeblock">
-            <div class="file-label">Terminal</div>
-            <pre><span class="s-cm"># Add Aegis to Claude Code</span>
-<span class="s-type">$</span> claude mcp add aegis npx aegis-defi
-
-<span class="s-cm"># Or run directly</span>
-<span class="s-type">$</span> npx aegis-defi
-
-<span class="s-cm"># Your agent now has 4 safety tools:</span>
-<span class="s-cm">#   scan_contract      - Static analysis for 22 exploit patterns</span>
-<span class="s-cm">#   simulate_transaction - Forked-chain tx simulation</span>
-<span class="s-cm">#   check_token        - Anti-honeypot token checks</span>
-<span class="s-cm">#   assess_risk        - All-in-one risk assessment</span></pre>
+    <!-- ========== Impact (asymmetric 2-col) ========== -->
+    <section class="py-24 px-8 bg-surface-container-lowest">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <!-- Chart card -->
+          <div class="relative reveal">
+            <div class="absolute -inset-4 bg-error/10 rounded-3xl blur-2xl"></div>
+            <div class="relative glass-card border border-error/20 p-12 rounded-[2.5rem] overflow-hidden">
+              <div class="flex justify-between items-start mb-8">
+                <div>
+                  <p class="text-error font-label text-[10px] uppercase tracking-widest mb-1">Cumulative Agent Losses</p>
+                  <h3 class="text-4xl font-black text-on-surface font-headline">$62,400,000</h3>
+                </div>
+                <span class="material-symbols-outlined text-error text-4xl">trending_up</span>
+              </div>
+              <div class="h-48 flex items-end gap-1.5">
+                <div class="w-full bg-error/10 h-[20%] rounded-t-lg"></div>
+                <div class="w-full bg-error/10 h-[35%] rounded-t-lg"></div>
+                <div class="w-full bg-error/20 h-[50%] rounded-t-lg"></div>
+                <div class="w-full bg-error/30 h-[45%] rounded-t-lg"></div>
+                <div class="w-full bg-error/40 h-[70%] rounded-t-lg"></div>
+                <div class="w-full bg-error/60 h-[85%] rounded-t-lg"></div>
+                <div class="w-full bg-error h-[100%] rounded-t-lg"></div>
+              </div>
+              <div class="mt-8 p-4 bg-error-container/20 rounded-xl border border-error/10">
+                <p class="text-on-error-container text-sm font-medium flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[18px]">warning</span>
+                  AI agent exploits increased by 420% in Q4 2025
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div id="panel-json" class="int-panel">
-          <div class="codeblock">
-            <div class="file-label">JSON - claude_desktop_config.json</div>
-            <pre><span class="s-op">{</span>
-  <span class="s-type">"mcpServers"</span><span class="s-op">:</span> <span class="s-op">{</span>
-    <span class="s-type">"aegis"</span><span class="s-op">:</span> <span class="s-op">{</span>
-      <span class="s-str">"command"</span><span class="s-op">:</span> <span class="s-str">"npx"</span><span class="s-op">,</span>
-      <span class="s-str">"args"</span><span class="s-op">:</span> <span class="s-op">[</span><span class="s-str">"aegis-defi"</span><span class="s-op">]</span>
-    <span class="s-op">}</span>
-  <span class="s-op">}</span>
-<span class="s-op">}</span></pre>
-          </div>
-        </div>
-
-        <div id="panel-code" class="int-panel">
-          <div class="codeblock">
-            <div class="file-label">TypeScript</div>
-            <pre><span class="s-kw">import</span> <span class="s-op">{</span> <span class="s-type">createAegisServer</span> <span class="s-op">}</span> <span class="s-kw">from</span> <span class="s-str">"aegis-defi"</span><span class="s-op">;</span>
-
-<span class="s-cm">// Create and start the MCP server</span>
-<span class="s-kw">const</span> server <span class="s-op">=</span> <span class="s-fn">createAegisServer</span><span class="s-op">();</span>
-
-<span class="s-cm">// Connect via stdio transport</span>
-<span class="s-kw">const</span> transport <span class="s-op">=</span> <span class="s-kw">new</span> <span class="s-type">StdioServerTransport</span><span class="s-op">();</span>
-<span class="s-kw">await</span> server.<span class="s-fn">connect</span><span class="s-op">(</span>transport<span class="s-op">);</span>
-
-<span class="s-cm">// The server exposes 4 tools:</span>
-<span class="s-cm">//   scan_contract, simulate_transaction,</span>
-<span class="s-cm">//   check_token, assess_risk</span>
-<span class="s-cm">// assess_risk returns signed attestations for</span>
-<span class="s-cm">// ALLOW/WARN decisions (chainId-bound signatures)</span></pre>
+          <!-- Text side -->
+          <div class="reveal">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-on-surface leading-tight font-headline">The price of<br>unsecured intelligence.</h2>
+            <p class="text-on-surface-variant text-lg font-body mb-8 leading-relaxed">
+              Current agent architectures lack sovereign safety layers. Aegis intercepts malicious logic before it hits the mempool, preventing catastrophic capital drainage.
+            </p>
+            <ul class="space-y-6">
+              <li class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                  <span class="material-symbols-outlined">shield</span>
+                </div>
+                <div>
+                  <h4 class="text-on-surface font-bold font-headline">Pre-flight Simulation</h4>
+                  <p class="text-on-surface-variant text-sm">Fork the chain. Run the trade. Check the outcome. All before real funds move.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                  <span class="material-symbols-outlined">layers</span>
+                </div>
+                <div>
+                  <h4 class="text-on-surface font-bold font-headline">Multi-Layer Verification</h4>
+                  <p class="text-on-surface-variant text-sm">Static analysis, bytecode scanning, fork simulation, on-chain enforcement.</p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== On-Chain ========== -->
-  <section id="onchain" style="border-top: 1px solid var(--border);">
-    <div class="wrap">
-      <span class="sh-label reveal">On-Chain Enforcement</span>
-      <h2 class="sh-title reveal">On-chain enforcement</h2>
-      <p class="sh-desc reveal">
-        Off-chain checks can be skipped. These can't. Two smart contracts on Base enforce safety at different levels.
-      </p>
-
-      <div class="chain-grid">
-        <div class="chain-card reveal">
-          <h3>AegisGateway <span class="chain-badge badge-base">Base</span></h3>
-          <p>For agents. Instead of calling DeFi contracts directly, your agent routes calls through the Gateway. It checks for a valid safety attestation (signed by Aegis after scanning and simulating) before forwarding the call. No attestation = transaction reverts. Works for any DeFi action: swaps, lending, staking, approvals.</p>
-          <div class="chain-meta">
-            <span class="lbl">Network</span>
-            <span class="val">Base (Chain ID 8453)</span>
-          </div>
-          <div class="chain-meta">
-            <span class="lbl">Security</span>
-            <span class="val">EIP-2 check, ecrecover guard, nonReentrant</span>
-          </div>
+    <!-- ========== Bento Grid: How It Works ========== -->
+    <section class="py-24 px-8 bg-surface" id="how-it-works">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="text-center mb-20">
+          <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">How It Works</p>
+          <h2 class="text-4xl md:text-6xl font-bold text-on-surface font-headline reveal">Three layers of protection</h2>
         </div>
 
-        <div class="chain-card reveal">
-          <h3>AegisSafetyHook <span class="chain-badge badge-v4">Uniswap v4</span></h3>
-          <p>For pool creators and LPs. Install this hook on your Uniswap v4 pool to require Aegis-verified attestations before any swap executes. Protects LPs from toxic flow and signals to agents that your pool is safe. A scam pool would never install this -- its presence is itself a trust signal.</p>
-          <div class="chain-meta">
-            <span class="lbl">Who installs it</span>
-            <span class="val">Pool creators, when they deploy a new Uniswap v4 pool</span>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <!-- MCP Server (wide) -->
+          <div class="md:col-span-8 group relative overflow-hidden rounded-[2rem] bg-surface-container-low border border-outline-variant/10 p-12 hover:border-primary/30 transition-all reveal">
+            <div class="relative z-10 h-full flex flex-col justify-between">
+              <div>
+                <span class="material-symbols-outlined text-5xl text-primary mb-6 glow-gold">shield_with_heart</span>
+                <h3 class="text-3xl font-bold text-on-surface mb-4 font-headline">MCP Safety Server</h3>
+                <p class="text-on-surface-variant text-lg max-w-md leading-relaxed">
+                  One command adds four safety tools to Claude, GPT, or any MCP-compatible agent. Your agent calls scan_contract, simulate_transaction, check_token, or assess_risk before every trade.
+                </p>
+              </div>
+              <div class="mt-12 flex gap-4 flex-wrap">
+                <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">MCP Protocol</div>
+                <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">4 Safety Tools</div>
+                <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Any LLM Agent</div>
+              </div>
+            </div>
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span class="material-symbols-outlined text-[20rem]">lock</span>
+            </div>
           </div>
-          <div class="chain-meta">
-            <span class="lbl">What it does</span>
-            <span class="val">Runs beforeSwap: blocks flagged tokens, requires valid attestation</span>
+
+          <!-- Contract Scanner (narrow) -->
+          <div class="md:col-span-4 glass-card rounded-[2rem] border border-outline-variant/10 p-8 flex flex-col justify-center text-center reveal">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 glow-cyan">radar</span>
+            <h3 class="text-xl font-bold text-on-surface mb-2 font-headline">Contract Scanner</h3>
+            <p class="text-on-surface-variant text-sm">22 exploit pattern checks against source code and bytecode.</p>
           </div>
-          <div class="chain-meta">
-            <span class="lbl">Why it matters</span>
-            <span class="val">Agents can treat hook-protected pools as inherently safer</span>
+
+          <!-- Fork Simulation (narrow) -->
+          <div class="md:col-span-4 glass-card rounded-[2rem] border border-outline-variant/10 p-8 flex flex-col justify-center text-center reveal">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 glow-cyan">flowsheet</span>
+            <h3 class="text-xl font-bold text-on-surface mb-2 font-headline">Fork Simulation</h3>
+            <p class="text-on-surface-variant text-sm">Run the trade on a forked chain. Check gas, slippage, revert risk. No real funds at risk.</p>
+          </div>
+
+          <!-- On-chain + code snippet (wide) -->
+          <div class="md:col-span-8 group relative overflow-hidden rounded-[2rem] bg-surface-container-low border border-outline-variant/10 p-12 hover:border-secondary/30 transition-all reveal">
+            <div class="relative z-10 flex flex-col md:flex-row gap-12 items-center">
+              <div class="md:w-1/2">
+                <h3 class="text-3xl font-bold text-on-surface mb-4 font-headline">On-Chain Enforcement</h3>
+                <p class="text-on-surface-variant leading-relaxed mb-6">
+                  Even if software fails, the blockchain doesn't. AegisGateway verifies a signed safety attestation before executing any DeFi call. No attestation, no execution.
+                </p>
+                <a class="text-secondary font-bold flex items-center gap-2 group-hover:gap-4 transition-all" href="#onchain">
+                  Learn more <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+              </div>
+              <div class="md:w-1/2 glass-card rounded-2xl p-6 border border-outline-variant/20 font-mono text-xs">
+                <div class="flex gap-2 mb-4">
+                  <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-secondary/40"></div>
+                </div>
+                <div class="text-on-surface-variant space-y-1">
+                  <p><span class="c-cm"># Add Aegis to Claude Code</span></p>
+                  <p><span class="c-type">$</span> claude mcp add aegis npx aegis-defi</p>
+                  <p>&nbsp;</p>
+                  <p><span class="c-cm"># Your agent now has:</span></p>
+                  <p><span class="c-cm">#   scan_contract</span></p>
+                  <p><span class="c-cm">#   simulate_transaction</span></p>
+                  <p><span class="c-cm">#   check_token</span></p>
+                  <p><span class="c-cm">#   assess_risk</span></p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== Case Studies ========== -->
-  <section id="case-studies">
-    <div class="wrap">
-      <span class="sh-label reveal">Real-World Impact</span>
-      <h2 class="sh-title reveal">$62M lost. All preventable.</h2>
-      <p class="sh-desc reveal">
-        These are real incidents from the last year. Each one would have been blocked by Aegis before any funds moved.
-      </p>
+    <!-- ========== Safety Pipeline ========== -->
+    <section class="py-32 px-8 relative overflow-hidden">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="flex flex-col items-center text-center mb-16">
+          <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">The Safety Pipeline</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-on-surface mb-4 font-headline reveal">Every trade passes through Aegis</h2>
+        </div>
 
-      <div class="cases">
-        <div class="case-row reveal">
+        <div class="relative flex flex-col md:flex-row justify-between items-center gap-8 px-12 reveal">
+          <!-- Connector line (desktop) -->
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent -z-10"></div>
+
+          <div class="flex flex-col items-center gap-4 group">
+            <div class="w-20 h-20 rounded-2xl glass-card border border-outline-variant/30 flex items-center justify-center group-hover:border-primary/50 transition-all duration-500">
+              <span class="material-symbols-outlined text-3xl text-primary">psychology</span>
+            </div>
+            <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Agent Intent</p>
+          </div>
+
+          <div class="md:rotate-0 rotate-90 opacity-40">
+            <span class="material-symbols-outlined">trending_flat</span>
+          </div>
+
+          <div class="flex flex-col items-center gap-4 group">
+            <div class="w-20 h-20 rounded-2xl glass-card border border-outline-variant/30 flex items-center justify-center group-hover:border-secondary/50 transition-all duration-500">
+              <span class="material-symbols-outlined text-3xl text-secondary">radar</span>
+            </div>
+            <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Contract Scan</p>
+          </div>
+
+          <div class="md:rotate-0 rotate-90 opacity-40">
+            <span class="material-symbols-outlined">trending_flat</span>
+          </div>
+
+          <div class="flex flex-col items-center gap-4 group">
+            <div class="w-20 h-20 rounded-2xl glass-card border border-outline-variant/30 flex items-center justify-center group-hover:border-primary/50 transition-all duration-500">
+              <span class="material-symbols-outlined text-3xl text-primary-dim">model_training</span>
+            </div>
+            <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Simulation</p>
+          </div>
+
+          <div class="md:rotate-0 rotate-90 opacity-40">
+            <span class="material-symbols-outlined">trending_flat</span>
+          </div>
+
+          <div class="flex flex-col items-center gap-4 group">
+            <div class="w-20 h-20 rounded-2xl border-primary/40 bg-primary/10 flex items-center justify-center shadow-[0_0_20px_rgba(255,231,146,0.15)]">
+              <span class="material-symbols-outlined text-3xl text-primary">verified_user</span>
+            </div>
+            <p class="text-[10px] font-label uppercase tracking-widest text-primary font-bold">Execution</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Exploit Patterns ========== -->
+    <section class="py-24 px-8 bg-surface-container-low" id="patterns">
+      <div class="max-w-screen-xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
           <div>
-            <span class="case-amount loss-crit">$50M LOST</span>
+            <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">What It Catches</p>
+            <h2 class="text-4xl md:text-5xl font-bold text-on-surface font-headline reveal">Known scams, caught instantly</h2>
+            <p class="text-on-surface-variant text-lg mt-3 max-w-xl reveal">Before your agent touches a contract, Aegis checks it against known attack patterns in both source code and bytecode.</p>
           </div>
-          <div class="case-body">
-            <h4>Aave Swap Disaster</h4>
-            <p>March 2026 -- A whale swapped $50M USDT for AAVE tokens. Routed through a pool with only $73K liquidity. MEV bots extracted $34M.</p>
-          </div>
-          <div class="case-catch">
-            <strong>Aegis catches it:</strong> simulate_transaction flags extreme price impact. Agent gets BLOCK decision.
-          </div>
+          <span class="font-mono text-xs text-outline px-3 py-1.5 border border-outline-variant rounded-lg whitespace-nowrap self-start reveal">22 patterns</span>
         </div>
 
-        <div class="case-row reveal">
-          <div>
-            <span class="case-amount loss-high">$11M EXPLOIT</span>
-          </div>
-          <div class="case-body">
-            <h4>Cork Protocol Hack</h4>
-            <p>May 2025 -- Missing access controls in CorkHook.beforeSwap() on Uniswap v4. Attacker bypassed all safety checks.</p>
-          </div>
-          <div class="case-catch">
-            <strong>Aegis catches it:</strong> AegisSafetyHook requires valid attestation before any swap executes.
-          </div>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-error shrink-0"></span><span class="text-sm font-medium">Asymmetric Buy/Sell Tax</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Traps funds with disproportionate sell tax</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-error shrink-0"></span><span class="text-sm font-medium">Sell Pause Mechanism</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Owner can disable selling entirely</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-error shrink-0"></span><span class="text-sm font-medium">Fake Ownership Renounce</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Hidden owner retains full control</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-error shrink-0"></span><span class="text-sm font-medium">Reentrancy Vulnerability</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">External call before state update</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-primary-dim shrink-0"></span><span class="text-sm font-medium">Hidden Max Sell Amount</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Prevents large position exits</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-primary-dim shrink-0"></span><span class="text-sm font-medium">Unrestricted Minting</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Unlimited token minting capability</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-primary-dim shrink-0"></span><span class="text-sm font-medium">Hidden Admin Functions</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Non-standard access control patterns</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-primary-dim shrink-0"></span><span class="text-sm font-medium">Flash Loan Vulnerability</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Manipulable price oracles</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-primary-dim shrink-0"></span><span class="text-sm font-medium">Permit/Approval Phishing</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Approval-draining mechanics</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"></span><span class="text-sm font-medium">Unlimited Approval</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Requires dangerous max approvals</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"></span><span class="text-sm font-medium">Blacklist Mechanism</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Can block addresses from transacting</span></div>
+          <div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors reveal"><span class="w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"></span><span class="text-sm font-medium">Upgradeable Proxy</span><span class="text-xs text-outline ml-auto text-right pl-4 hidden md:block">Logic can change post-deployment</span></div>
         </div>
 
-        <div class="case-row reveal">
-          <div>
-            <span class="case-amount loss-med">$1.78M DRAINED</span>
+        <p class="text-center text-sm text-outline mt-6 reveal">
+          + 10 more patterns including delegatecall injection, oracle manipulation, gas griefing, and cross-chain replay.
+          <a href="https://github.com/StanleytheGoat/aegis#exploit-patterns" target="_blank" rel="noopener" class="text-primary hover:text-on-surface">See all</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== Integration ========== -->
+    <section class="py-24 px-8" id="integration">
+      <div class="max-w-screen-xl mx-auto">
+        <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">Integration</p>
+        <h2 class="text-4xl md:text-5xl font-bold text-on-surface font-headline reveal">Add it in 30 seconds</h2>
+        <p class="text-on-surface-variant text-lg mt-3 max-w-xl reveal">Aegis is an MCP server. If your agent speaks MCP, it already works.</p>
+
+        <div class="reveal mt-10">
+          <div class="flex gap-0.5 border-b border-outline-variant">
+            <button class="int-tab active px-6 py-3 text-sm font-medium border-b-2 transition-colors text-primary border-primary bg-transparent" onclick="switchTab(event, 'panel-cli')">Claude CLI</button>
+            <button class="int-tab px-6 py-3 text-sm font-medium border-b-2 transition-colors text-on-surface-variant border-transparent hover:text-on-surface bg-transparent" onclick="switchTab(event, 'panel-json')">MCP Config</button>
+            <button class="int-tab px-6 py-3 text-sm font-medium border-b-2 transition-colors text-on-surface-variant border-transparent hover:text-on-surface bg-transparent" onclick="switchTab(event, 'panel-code')">Programmatic</button>
           </div>
-          <div class="case-body">
-            <h4>Moonwell Oracle Attack</h4>
-            <p>Feb 2026 -- Oracle misconfiguration on Base priced cbETH incorrectly. Attacker exploited the price discrepancy.</p>
+
+          <div id="panel-cli" class="int-panel active">
+            <div class="bg-surface-container-lowest/40 border border-outline-variant border-t-0 rounded-b-2xl p-6 overflow-x-auto">
+              <div class="font-mono text-[11px] text-outline-variant uppercase tracking-widest mb-4 pb-3 border-b border-outline-variant/30">Terminal</div>
+              <pre class="font-mono text-[13px] leading-[1.8] text-on-surface-variant"><span class="c-cm"># Add Aegis to Claude Code</span>
+<span class="c-type">$</span> claude mcp add aegis npx aegis-defi
+
+<span class="c-cm"># Or run directly</span>
+<span class="c-type">$</span> npx aegis-defi
+
+<span class="c-cm"># Your agent now has 4 safety tools:</span>
+<span class="c-cm">#   scan_contract      - Static analysis for 22 exploit patterns</span>
+<span class="c-cm">#   simulate_transaction - Forked-chain tx simulation</span>
+<span class="c-cm">#   check_token        - Anti-honeypot token checks</span>
+<span class="c-cm">#   assess_risk        - All-in-one risk assessment</span></pre>
+            </div>
           </div>
-          <div class="case-catch">
-            <strong>Aegis catches it:</strong> Pattern 17 (Oracle Manipulation) detects inline reserve-based pricing.
+
+          <div id="panel-json" class="int-panel">
+            <div class="bg-surface-container-lowest/40 border border-outline-variant border-t-0 rounded-b-2xl p-6 overflow-x-auto">
+              <div class="font-mono text-[11px] text-outline-variant uppercase tracking-widest mb-4 pb-3 border-b border-outline-variant/30">JSON - claude_desktop_config.json</div>
+              <pre class="font-mono text-[13px] leading-[1.8] text-on-surface-variant"><span class="c-op">{</span>
+  <span class="c-type">"mcpServers"</span><span class="c-op">:</span> <span class="c-op">{</span>
+    <span class="c-type">"aegis"</span><span class="c-op">:</span> <span class="c-op">{</span>
+      <span class="c-str">"command"</span><span class="c-op">:</span> <span class="c-str">"npx"</span><span class="c-op">,</span>
+      <span class="c-str">"args"</span><span class="c-op">:</span> <span class="c-op">[</span><span class="c-str">"aegis-defi"</span><span class="c-op">]</span>
+    <span class="c-op">}</span>
+  <span class="c-op">}</span>
+<span class="c-op">}</span></pre>
+            </div>
+          </div>
+
+          <div id="panel-code" class="int-panel">
+            <div class="bg-surface-container-lowest/40 border border-outline-variant border-t-0 rounded-b-2xl p-6 overflow-x-auto">
+              <div class="font-mono text-[11px] text-outline-variant uppercase tracking-widest mb-4 pb-3 border-b border-outline-variant/30">TypeScript</div>
+              <pre class="font-mono text-[13px] leading-[1.8] text-on-surface-variant"><span class="c-kw">import</span> <span class="c-op">{</span> <span class="c-type">createAegisServer</span> <span class="c-op">}</span> <span class="c-kw">from</span> <span class="c-str">"aegis-defi"</span><span class="c-op">;</span>
+
+<span class="c-cm">// Create and start the MCP server</span>
+<span class="c-kw">const</span> server <span class="c-op">=</span> <span class="c-fn">createAegisServer</span><span class="c-op">();</span>
+
+<span class="c-cm">// Connect via stdio transport</span>
+<span class="c-kw">const</span> transport <span class="c-op">=</span> <span class="c-kw">new</span> <span class="c-type">StdioServerTransport</span><span class="c-op">();</span>
+<span class="c-kw">await</span> server.<span class="c-fn">connect</span><span class="c-op">(</span>transport<span class="c-op">);</span>
+
+<span class="c-cm">// The server exposes 4 tools:</span>
+<span class="c-cm">//   scan_contract, simulate_transaction,</span>
+<span class="c-cm">//   check_token, assess_risk</span>
+<span class="c-cm">// assess_risk returns signed attestations for</span>
+<span class="c-cm">// ALLOW/WARN decisions (chainId-bound signatures)</span></pre>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== Architecture ========== -->
-  <section id="architecture" style="border-top: 1px solid var(--border);">
-    <div class="wrap">
-      <span class="sh-label reveal">Architecture</span>
-      <h2 class="sh-title reveal">End-to-end safety pipeline</h2>
+    <!-- ========== On-Chain Enforcement ========== -->
+    <section class="py-24 px-8 bg-surface-container-low" id="onchain">
+      <div class="max-w-screen-xl mx-auto">
+        <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">On-Chain Enforcement</p>
+        <h2 class="text-4xl md:text-5xl font-bold text-on-surface font-headline reveal">Smart contracts that can't be skipped</h2>
+        <p class="text-on-surface-variant text-lg mt-3 max-w-xl reveal">Off-chain checks can be bypassed. These can't. Two smart contracts on Base enforce safety at the protocol level.</p>
 
-      <div class="arch-flow reveal">
-        <div class="arch-row">
-          <div class="arch-node">
-            <div class="arch-node-title">AI Agent</div>
-            <div class="arch-node-detail">Claude<br>GPT<br>Any agent</div>
+        <div class="grid lg:grid-cols-2 gap-6 mt-10">
+          <!-- Gateway -->
+          <div class="glass-card rounded-[2rem] border border-outline-variant/10 p-8 hover:border-primary/20 transition-all reveal">
+            <h3 class="text-2xl font-bold text-on-surface mb-4 font-headline flex items-center gap-3">
+              AegisGateway
+              <span class="text-[10px] font-label font-semibold px-2 py-0.5 rounded bg-[rgba(0,82,255,0.15)] text-[#5b8def]">Base</span>
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed mb-6">
+              For agents. Instead of calling DeFi contracts directly, your agent routes calls through the Gateway. It checks for a valid safety attestation (signed by Aegis after scanning and simulating) before forwarding the call. No attestation = transaction reverts.
+            </p>
+            <div class="flex gap-3 p-3 bg-surface-container-lowest/40 border border-outline-variant/15 rounded-xl text-[13px] mb-2">
+              <span class="text-outline min-w-[80px]">Network</span>
+              <span class="text-on-surface-variant">Base (Chain ID 8453)</span>
+            </div>
+            <div class="flex gap-3 p-3 bg-surface-container-lowest/40 border border-outline-variant/15 rounded-xl text-[13px]">
+              <span class="text-outline min-w-[80px]">Security</span>
+              <span class="text-on-surface-variant">EIP-2 check, ecrecover guard, nonReentrant</span>
+            </div>
           </div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node">
-            <div class="arch-node-title" style="color: var(--accent-text);">MCP Server</div>
-            <div class="arch-node-detail">4 tools<br>scan_contract<br>simulate_tx<br>check_token<br>assess_risk</div>
-          </div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node">
-            <div class="arch-node-title" style="color: #c792ea;">Risk Engine</div>
-            <div class="arch-node-detail">22 patterns<br>Static analysis<br>Bytecode check<br>Fork simulation</div>
-          </div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node">
-            <div class="arch-node-title" style="color: #dbb544;">Attester</div>
-            <div class="arch-node-detail">Signs<br>attestation<br>(chainId-bound)</div>
-          </div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node">
-            <div class="arch-node-title" style="color: #82aaff;">Gateway</div>
-            <div class="arch-node-detail">Verifies<br>attestation<br>on-chain</div>
-          </div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node">
-            <div class="arch-node-title" style="color: #ff6b9d;">Pool</div>
-            <div class="arch-node-detail">Executes<br>swap<br>Uniswap v4</div>
+
+          <!-- Hook -->
+          <div class="glass-card rounded-[2rem] border border-outline-variant/10 p-8 hover:border-secondary/20 transition-all reveal">
+            <h3 class="text-2xl font-bold text-on-surface mb-4 font-headline flex items-center gap-3">
+              AegisSafetyHook
+              <span class="text-[10px] font-label font-semibold px-2 py-0.5 rounded bg-[rgba(255,0,122,0.12)] text-[#ff6b9d]">Uniswap v4</span>
+            </h3>
+            <p class="text-on-surface-variant leading-relaxed mb-6">
+              For pool creators and LPs. Install this hook on your Uniswap v4 pool to require Aegis-verified attestations before any swap. A scam pool would never install this -- its presence is itself a trust signal.
+            </p>
+            <div class="flex gap-3 p-3 bg-surface-container-lowest/40 border border-outline-variant/15 rounded-xl text-[13px] mb-2">
+              <span class="text-outline min-w-[80px]">Who installs</span>
+              <span class="text-on-surface-variant">Pool creators, when deploying a new Uniswap v4 pool</span>
+            </div>
+            <div class="flex gap-3 p-3 bg-surface-container-lowest/40 border border-outline-variant/15 rounded-xl text-[13px] mb-2">
+              <span class="text-outline min-w-[80px]">What it does</span>
+              <span class="text-on-surface-variant">Runs beforeSwap: blocks flagged tokens, requires valid attestation</span>
+            </div>
+            <div class="flex gap-3 p-3 bg-surface-container-lowest/40 border border-outline-variant/15 rounded-xl text-[13px]">
+              <span class="text-outline min-w-[80px]">Why it matters</span>
+              <span class="text-on-surface-variant">Agents can treat hook-protected pools as inherently safer</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <!-- ========== Case Studies ========== -->
+    <section class="py-24 px-8" id="case-studies">
+      <div class="max-w-screen-xl mx-auto">
+        <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">Real-World Impact</p>
+        <h2 class="text-4xl md:text-5xl font-bold text-on-surface font-headline reveal">$62M lost. All preventable.</h2>
+        <p class="text-on-surface-variant text-lg mt-3 max-w-xl reveal">Real incidents from the last year. Each one would have been blocked by Aegis before any funds moved.</p>
+
+        <div class="flex flex-col gap-4 mt-10">
+          <div class="grid grid-cols-1 md:grid-cols-[140px_1fr_1fr] gap-6 p-6 bg-surface-container border border-outline-variant/10 rounded-2xl hover:border-outline-variant/30 transition-colors reveal">
+            <div><span class="font-mono text-xs font-medium px-3 py-1 rounded-lg bg-error/10 text-error inline-block">$50M LOST</span></div>
+            <div>
+              <h4 class="font-bold font-headline mb-1">Aave Swap Disaster</h4>
+              <p class="text-sm text-on-surface-variant leading-relaxed">March 2026 -- A whale swapped $50M USDT for AAVE tokens. Routed through a pool with only $73K liquidity. MEV bots extracted $34M.</p>
+            </div>
+            <div class="text-sm text-on-surface-variant leading-relaxed">
+              <strong class="text-secondary">Aegis catches it:</strong> simulate_transaction flags extreme price impact. Agent gets BLOCK decision.
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-[140px_1fr_1fr] gap-6 p-6 bg-surface-container border border-outline-variant/10 rounded-2xl hover:border-outline-variant/30 transition-colors reveal">
+            <div><span class="font-mono text-xs font-medium px-3 py-1 rounded-lg bg-primary-dim/10 text-primary-dim inline-block">$11M EXPLOIT</span></div>
+            <div>
+              <h4 class="font-bold font-headline mb-1">Cork Protocol Hack</h4>
+              <p class="text-sm text-on-surface-variant leading-relaxed">May 2025 -- Missing access controls in CorkHook.beforeSwap() on Uniswap v4. Attacker bypassed all safety checks.</p>
+            </div>
+            <div class="text-sm text-on-surface-variant leading-relaxed">
+              <strong class="text-secondary">Aegis catches it:</strong> AegisSafetyHook requires valid attestation before any swap executes.
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-[140px_1fr_1fr] gap-6 p-6 bg-surface-container border border-outline-variant/10 rounded-2xl hover:border-outline-variant/30 transition-colors reveal">
+            <div><span class="font-mono text-xs font-medium px-3 py-1 rounded-lg bg-tertiary/10 text-tertiary inline-block">$1.78M DRAINED</span></div>
+            <div>
+              <h4 class="font-bold font-headline mb-1">Moonwell Oracle Attack</h4>
+              <p class="text-sm text-on-surface-variant leading-relaxed">Feb 2026 -- Oracle misconfiguration on Base priced cbETH incorrectly. Attacker exploited the price discrepancy.</p>
+            </div>
+            <div class="text-sm text-on-surface-variant leading-relaxed">
+              <strong class="text-secondary">Aegis catches it:</strong> Pattern 17 (Oracle Manipulation) detects inline reserve-based pricing.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Architecture ========== -->
+    <section class="py-24 px-8 bg-surface-container-low" id="architecture">
+      <div class="max-w-screen-xl mx-auto">
+        <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4 reveal">Architecture</p>
+        <h2 class="text-4xl md:text-5xl font-bold text-on-surface font-headline reveal">End-to-end safety pipeline</h2>
+
+        <div class="mt-10 p-8 bg-surface-container border border-outline-variant/10 rounded-2xl overflow-x-auto reveal">
+          <div class="flex items-start justify-between gap-0 min-w-[700px]">
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2">AI Agent</div>
+              <div class="text-[11px] text-outline leading-relaxed">Claude<br>GPT<br>Any agent</div>
+            </div>
+            <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2 text-primary">MCP Server</div>
+              <div class="text-[11px] text-outline leading-relaxed">4 tools<br>scan_contract<br>simulate_tx<br>check_token<br>assess_risk</div>
+            </div>
+            <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2 text-tertiary">Risk Engine</div>
+              <div class="text-[11px] text-outline leading-relaxed">22 patterns<br>Static analysis<br>Bytecode check<br>Fork simulation</div>
+            </div>
+            <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2 text-primary-dim">Attester</div>
+              <div class="text-[11px] text-outline leading-relaxed">Signs<br>attestation<br>(chainId-bound)</div>
+            </div>
+            <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2 text-secondary">Gateway</div>
+              <div class="text-[11px] text-outline leading-relaxed">Verifies<br>attestation<br>on-chain</div>
+            </div>
+            <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
+            <div class="text-center flex-1 min-w-[90px]">
+              <div class="text-[13px] font-bold font-headline mb-2 text-[#ff6b9d]">Pool</div>
+              <div class="text-[11px] text-outline leading-relaxed">Executes<br>swap<br>Uniswap v4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CTA ========== -->
+    <section class="py-32 px-8">
+      <div class="max-w-screen-xl mx-auto rounded-[3rem] bg-gradient-to-br from-surface-container to-surface-container-high border border-outline-variant/20 p-16 relative overflow-hidden reveal">
+        <div class="relative z-10 text-center">
+          <h2 class="text-4xl md:text-6xl font-black mb-8 font-headline">Ready to secure<br>your agent?</h2>
+          <p class="text-on-surface-variant text-lg mb-12 max-w-xl mx-auto">Open source, MIT licensed, free to use. One command to protect every trade your agent makes.</p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener"
+               class="w-full sm:w-auto px-12 py-5 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-bold rounded-full text-lg shadow-xl shadow-primary/20 text-center">
+              View on GitHub
+            </a>
+            <a href="https://www.npmjs.com/package/aegis-defi" target="_blank" rel="noopener"
+               class="w-full sm:w-auto px-12 py-5 glass-card border border-outline-variant/30 text-on-surface font-bold rounded-full text-lg text-center">
+              npm install
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <!-- ========== Footer ========== -->
-  <footer>
-    <div class="wrap">
-      <div class="foot-inner">
-        <div class="foot-brand">
-          <span class="nav-mark">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#111113"/>
-              <path d="M9 12l2 2 4-4" stroke="#111113" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          Aegis
+  <footer class="bg-surface-container-lowest w-full py-16 border-t border-outline-variant/20">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-12 px-12 max-w-screen-xl mx-auto">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+            <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="text-lg font-bold text-on-surface font-headline">Aegis</span>
         </div>
-
-        <ul class="foot-links">
-          <li><a href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="https://github.com/StanleytheGoat/aegis#readme" target="_blank" rel="noopener">Docs</a></li>
-          <li><a href="https://github.com/StanleytheGoat/aegis/issues" target="_blank" rel="noopener">Issues</a></li>
-          <li><a href="https://www.npmjs.com/package/aegis-defi" target="_blank" rel="noopener">npm</a></li>
-          <li><a href="/llms.txt">llms.txt</a></li>
-        </ul>
-
-        <span class="foot-license">MIT License</span>
+        <p class="text-outline text-sm leading-relaxed mb-6">DeFi safety layer for autonomous AI agents.</p>
+        <p class="text-[10px] font-label uppercase text-outline-variant tracking-widest">MIT License</p>
+      </div>
+      <div class="flex flex-col gap-4">
+        <h5 class="text-primary text-[10px] font-label uppercase tracking-[0.2em]">Product</h5>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="#how-it-works">How It Works</a>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="#patterns">Patterns</a>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="#onchain">On-Chain</a>
+      </div>
+      <div class="flex flex-col gap-4">
+        <h5 class="text-primary text-[10px] font-label uppercase tracking-[0.2em]">Resources</h5>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="https://github.com/StanleytheGoat/aegis" target="_blank" rel="noopener">GitHub</a>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="https://github.com/StanleytheGoat/aegis#readme" target="_blank" rel="noopener">Docs</a>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="https://www.npmjs.com/package/aegis-defi" target="_blank" rel="noopener">npm</a>
+      </div>
+      <div class="flex flex-col gap-4">
+        <h5 class="text-primary text-[10px] font-label uppercase tracking-[0.2em]">Links</h5>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="https://github.com/StanleytheGoat/aegis/issues" target="_blank" rel="noopener">Issues</a>
+        <a class="text-outline hover:text-on-surface transition-colors text-sm" href="/llms.txt">llms.txt</a>
       </div>
     </div>
   </footer>
 
-  <!-- ========== Scripts ========== -->
   <script>
-    // Tab switching
-    function switchTab(e, panelId) {
-      document.querySelectorAll('.int-tab').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.int-panel').forEach(c => c.classList.remove('active'));
-      e.target.classList.add('active');
-      document.getElementById(panelId).classList.add('active');
-    }
-
     // Reveal on scroll
     const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-    // Close mobile nav on link click
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.querySelector('.nav-links').classList.remove('open');
+    // Tab switching
+    function switchTab(e, panelId) {
+      document.querySelectorAll('.int-tab').forEach(t => {
+        t.classList.remove('text-primary', 'border-primary');
+        t.classList.add('text-on-surface-variant', 'border-transparent');
       });
-    });
+      document.querySelectorAll('.int-panel').forEach(p => p.classList.remove('active'));
+      e.target.classList.remove('text-on-surface-variant', 'border-transparent');
+      e.target.classList.add('text-primary', 'border-primary');
+      document.getElementById(panelId).classList.add('active');
+    }
   </script>
-
 </body>
 </html>
