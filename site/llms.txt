@@ -126,8 +126,6 @@ Network: Base (Chain ID 8453)
 ### AegisGateway
 Address: 0x62c64c063ddbcd438f924184c03d8dad45230fa3 (Base mainnet, verified on Basescan)
 Routes agent transactions through safety checks with on-chain enforcement. Signatures include chain ID + contract address to prevent cross-chain replay.
-- Fee: 5 basis points (0.05%) per transaction
-- Fee recipient: Safe multisig, immutable
 - Ownership transferred to Safe multisig
 - Source verified on Basescan
 
