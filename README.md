@@ -75,6 +75,8 @@ Aegis Risk Assessment
 - [Agent Integration Guide](./docs/agent-integration.md) - how to connect your agent
 - [Project Integration Guide](./docs/project-integration.md) - how to integrate Aegis into a product
 - [Flaunch Integration](./integrations/flaunch/) - safety checks for Flaunch memecoin trading
+- [ElizaOS Plugin](./integrations/elizaos/) - native Aegis actions for ElizaOS agents
+- [AgentKit Provider](./integrations/agentkit/) - Coinbase AgentKit ActionProvider for Aegis
 - [llms.txt](./site/llms.txt) - machine-readable description for agentic search
 
 ## Security

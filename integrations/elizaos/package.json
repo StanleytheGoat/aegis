@@ -1,0 +1,42 @@
+{
+  "name": "@aegis-defi/plugin-elizaos",
+  "version": "0.1.0",
+  "description": "ElizaOS plugin for Aegis DeFi safety - contract scanning, transaction simulation, and honeypot detection",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "aegis-defi": "^0.5.0"
+  },
+  "peerDependencies": {
+    "@elizaos/core": ">=0.2.0"
+  },
+  "devDependencies": {
+    "@elizaos/core": ">=0.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "defi",
+    "security",
+    "smart-contract",
+    "audit"
+  ]
+}

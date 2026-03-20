@@ -1,0 +1,23 @@
+{
+  "name": "@aegis-defi/agentkit",
+  "version": "0.1.0",
+  "description": "Coinbase AgentKit ActionProvider for the Aegis DeFi safety engine",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "aegis-defi": "^0.5.0",
+    "zod": "^3.22.0"
+  },
+  "peerDependencies": {
+    "@coinbase/agentkit": "^0.1.0"
+  },
+  "keywords": ["aegis", "defi", "agentkit", "coinbase", "safety", "risk"],
+  "license": "MIT"
+}
