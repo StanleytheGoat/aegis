@@ -166,6 +166,126 @@ export const EXPLOIT_PATTERNS: ExploitPattern[] = [
       /permit\(.*?\).*?transferFrom/s,
     ],
   },
+
+  // --- Metamorphic and Advanced Exploit Patterns ---
+  {
+    id: "metamorphic-contract",
+    name: "Metamorphic Contract (CREATE2 + SELFDESTRUCT)",
+    severity: "critical",
+    description:
+      "Contract uses CREATE2 with SELFDESTRUCT, allowing code to be destroyed and redeployed at the same address with different logic.",
+    riskWeight: 95,
+    sourcePatterns: [
+      /selfdestruct\s*\(/i,
+      /assembly\s*\{[^}]*create2/i,
+    ],
+  },
+  {
+    id: "hidden-balance-modifier",
+    name: "Hidden Balance Modifier",
+    severity: "critical",
+    description:
+      "Contract contains functions that can directly set or modify token balances, enabling silent minting or theft.",
+    riskWeight: 90,
+    sourcePatterns: [
+      /_balances\s*\[.*\]\s*=\s*/,
+      /function\s+\w*(set|adjust|modify|update)\w*[Bb]alanc/i,
+    ],
+  },
+  {
+    id: "hidden-fee-modifier",
+    name: "Hidden Fee Modifier (Dynamic Tax Change)",
+    severity: "high",
+    description:
+      "Owner can change buy/sell fees after launch, potentially raising them to trap holders.",
+    riskWeight: 75,
+    sourcePatterns: [
+      /function\s+set\w*(fee|tax|rate)/i,
+      /(_sellFee|_buyFee|_taxFee|_liquidityFee|_totalFee)\s*=\s*/,
+    ],
+  },
+  {
+    id: "hidden-transfer-drain",
+    name: "Hidden Transfer / Balance Drain",
+    severity: "critical",
+    description:
+      "Owner-only function that can invoke internal transfers or directly modify balances to drain user funds.",
+    riskWeight: 90,
+    sourcePatterns: [
+      /function\s+\w+.*onlyOwner[^{]*\{[^}]*_transfer\s*\(/,
+      /function\s+\w+.*onlyOwner[^{]*\{[^}]*balances\s*\[/,
+    ],
+  },
+  {
+    id: "oracle-manipulation",
+    name: "Oracle Manipulation / Flash Loan Price Attack",
+    severity: "critical",
+    description:
+      "Contract reads spot reserves from a DEX pair for pricing, making it vulnerable to flash-loan-based price manipulation.",
+    riskWeight: 85,
+    sourcePatterns: [
+      /getReserves\s*\(\s*\)/,
+      /reserve[01]\s*[\/\*]\s*reserve[01]/,
+      /IUniswapV2Pair.*getReserves/,
+    ],
+  },
+  {
+    id: "transfer-callback-trap",
+    name: "Transfer Callback Trap (Delayed Honeypot)",
+    severity: "critical",
+    description:
+      "Transfer function checks block timestamp or number, enabling the deployer to activate a honeypot after initial trading appears safe.",
+    riskWeight: 90,
+    sourcePatterns: [
+      /function\s+_transfer[^}]*require\s*\([^)]*block\.(timestamp|number)/,
+      /function\s+_transfer[^}]*tradingEnabled/,
+    ],
+  },
+  {
+    id: "mev-sandwich-risk",
+    name: "MEV Sandwich Risk",
+    severity: "high",
+    description:
+      "Low liquidity pool vulnerable to sandwich attacks targeting automated traders.",
+    riskWeight: 60,
+    sourcePatterns: [
+      /swapExactTokensForTokens|swapExactETHForTokens|swapTokensForExactTokens/,
+    ],
+  },
+  {
+    id: "malicious-permit",
+    name: "Malicious Permit Implementation",
+    severity: "high",
+    description:
+      "Non-standard permit implementation that approves a different address than the declared spender, enabling silent fund theft via gasless signatures.",
+    riskWeight: 80,
+    sourcePatterns: [
+      /function\s+permit\s*\([^)]*\)[^{]*\{[^}]*_approve\s*\(\s*\w+\s*,\s*(?!spender)/,
+    ],
+  },
+  {
+    id: "unaudited-lp-locker",
+    name: "Unaudited LP Locker",
+    severity: "high",
+    description:
+      "Liquidity-lock contract includes owner-only emergency withdraw or unlock functions, allowing the deployer to pull liquidity at any time.",
+    riskWeight: 70,
+    sourcePatterns: [
+      /function\s+\w*(withdraw|unlock|release|emergency)\w*.*onlyOwner/i,
+    ],
+  },
+  {
+    id: "burn-price-manipulation",
+    name: "Burn Mechanism Price Manipulation",
+    severity: "high",
+    description:
+      "Owner can burn tokens directly from the liquidity pair, artificially inflating the token price for a profitable exit.",
+    riskWeight: 75,
+    sourcePatterns: [
+      /function\s+burn\s*\([^)]*\)[^{]*onlyOwner/,
+      /_burn\s*\(\s*(pair|lpAddress|uniswapV2Pair)/,
+    ],
+  },
 ];
 
 /**
