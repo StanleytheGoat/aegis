@@ -26,3 +26,16 @@ export {
   type RawCallFrame,
 } from "./tracer.js";
 export { EXPLOIT_PATTERNS, type ExploitPattern } from "./patterns.js";
+export {
+  signAttestation,
+  signHookAttestation,
+  generateAttestationId,
+} from "./attester.js";
+export {
+  enrichWithSolodit,
+  querySolodit,
+  searchSolodit,
+  type SoloditFinding,
+  type SoloditEnrichment,
+  type EnrichedScanResult,
+} from "./solodit.js";

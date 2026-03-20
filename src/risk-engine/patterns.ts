@@ -2107,7 +2107,7 @@ export const EXPLOIT_PATTERNS: ExploitPattern[] = [
   },
 
   // =========================================================================
-  // Category 25: Multi-Hop & Complex DeFi (2)
+  // Category 25: Multi-Hop & Complex DeFi (3)
   // =========================================================================
 
   {
@@ -2132,6 +2132,19 @@ export const EXPLOIT_PATTERNS: ExploitPattern[] = [
     sourcePatterns: [
       /function\s+\w*(?:getLPPrice|lpValue|lpTokenPrice)\w*/i,
       /sqrt\s*\([\s\S]{0,100}reserve[\s\S]{0,100}reserve/s,
+    ],
+  },
+  {
+    id: "defi-sandwich-no-deadline",
+    name: "Missing Swap Deadline Protection",
+    severity: "high",
+    description:
+      "Swap transaction has no deadline parameter or uses block.timestamp as the deadline, leaving it vulnerable to sandwich attacks and indefinite pending in the mempool.",
+    riskWeight: 65,
+    sourcePatterns: [
+      /deadline\s*(?:=|:)\s*block\.timestamp/,
+      /swap\w*\([^)]*(?:type\(uint256\)\.max|2\*\*256|block\.timestamp)[^)]*\)/,
+      /function\s+swap\w*\([^)]*\)\s*(?:external|public)(?:(?!deadline).)*$/ms,
     ],
   },
 ];

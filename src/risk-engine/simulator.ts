@@ -278,8 +278,11 @@ export async function fetchContractSource(
   const apiKey = process.env.ETHERSCAN_API_KEY || "";
 
   try {
+    const fetchOpts = { signal: AbortSignal.timeout(10_000) };
+
     const sourceUrl = `${apiBase}?module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
-    const sourceRes = await fetch(sourceUrl);
+    const sourceRes = await fetch(sourceUrl, fetchOpts);
+    if (!sourceRes.ok) return {};
     const sourceData = await sourceRes.json();
 
     if (sourceData.result?.[0]?.SourceCode) {
@@ -290,7 +293,8 @@ export async function fetchContractSource(
     }
 
     const codeUrl = `${apiBase}?module=proxy&action=eth_getCode&address=${address}&tag=latest&apikey=${apiKey}`;
-    const codeRes = await fetch(codeUrl);
+    const codeRes = await fetch(codeUrl, fetchOpts);
+    if (!codeRes.ok) return {};
     const codeData = await codeRes.json();
 
     if (codeData.result && codeData.result !== "0x") {

@@ -1,16 +1,25 @@
 {
   "name": "aegis-defi",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A safety layer for autonomous DeFi agents - MCP server + smart contracts that simulate, scan, and protect on-chain transactions before execution.",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/risk-engine/index.js",
   "bin": {
     "aegis": "dist/index.js"
   },
+  "exports": {
+    ".": "./dist/risk-engine/index.js",
+    "./server": "./dist/mcp-server/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
-    "start": "node dist/index.ts",
+    "start": "node dist/index.js",
     "compile": "hardhat compile",
     "test:contracts": "hardhat test",
     "test": "vitest run",
@@ -18,16 +27,16 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@openzeppelin/contracts": "^5.6.1",
-    "@uniswap/v4-core": "^1.0.2",
-    "@uniswap/v4-periphery": "^1.0.3",
-    "ethers": "^6.13.0",
     "viem": "^2.21.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
     "@types/node": "^22.0.0",
+    "@uniswap/v4-core": "^4.0.0",
+    "@uniswap/v4-periphery": "^4.0.0",
+    "ethers": "^6.13.0",
     "hardhat": "^2.22.17",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",

@@ -90,6 +90,11 @@ export const WELL_KNOWN_CONTRACTS: Set<string> = new Set([
   "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", // WBTC
   "0x1111111254eeb25477b68fb85ed929f73a960582", // 1inch v5
   "0x1111111254fb6c44bac0bed2854e76f90643097d", // 1inch v4
+  "0xdef171fe48cf0115b1d80b88dc8eab59176fee57", // Paraswap V5
+  "0xba12222222228d8ba445958a75a0704d566bf2c8", // Balancer V2 Vault
+  "0x9008d19f58aabd9ed0d60971565aa8510560ab41", // CoW Protocol Settlement
+  "0x000000000022d473030f116ddee9f6b43ac78ba3", // Permit2 (Uniswap)
+  "0x1f98431c8ad98523631ae4a59f267346ea31f984", // Uniswap V3 Factory
 
   // -- Base mainnet --
   "0x4200000000000000000000000000000000000006", // WETH on Base
@@ -97,6 +102,7 @@ export const WELL_KNOWN_CONTRACTS: Set<string> = new Set([
   "0x2626664c2603336e57b271c5c0b26f421741e481", // Uniswap V3 SwapRouter on Base
   "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad", // Universal Router on Base
   "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", // Uniswap V3 Factory on Base
+  "0x498581ff718922c3f8e6a244956af099b2652b2b", // Uniswap V4 PoolManager on Base
 ]);
 
 // ---------------------------------------------------------------------------

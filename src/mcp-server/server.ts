@@ -23,14 +23,16 @@ import {
   fetchContractSource,
 } from "../risk-engine/simulator.js";
 import { traceTransaction, filterScanTargets, isWellKnown } from "../risk-engine/tracer.js";
-import { signAttestation, generateAttestationId } from "../risk-engine/attester.js";
+import { signAttestation, signHookAttestation, generateAttestationId } from "../risk-engine/attester.js";
 import { enrichWithSolodit, querySolodit } from "../risk-engine/solodit.js";
 import type { Address, Hex } from "viem";
+
+const evmAddress = z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Must be a valid EVM address (0x + 40 hex chars)");
 
 export function createAegisServer(): McpServer {
   const server = new McpServer({
     name: "aegis",
-    version: "0.1.0",
+    version: "0.5.0",
   });
 
   // --- Tool: scan_contract ---
@@ -40,7 +42,7 @@ export function createAegisServer(): McpServer {
     {
       source: z.string().optional().describe("Solidity source code of the contract to analyze"),
       bytecode: z.string().optional().describe("Contract bytecode (hex) to analyze if source is unavailable"),
-      contractAddress: z.string().optional().describe("Contract address - if provided, will attempt to fetch source from block explorer"),
+      contractAddress: evmAddress.optional().describe("Contract address - if provided, will attempt to fetch source from block explorer"),
       chainId: z.number().default(1).describe("Chain ID (1=Ethereum, 8453=Base, 84532=Base Sepolia)"),
     },
     async ({ source, bytecode, contractAddress, chainId }) => {
@@ -93,8 +95,8 @@ export function createAegisServer(): McpServer {
     "Simulate a transaction on a forked chain WITHOUT actually executing it. Detects reverts, abnormal gas usage, and other red flags. Use this to preview what will happen before sending a real transaction.",
     {
       chainId: z.number().default(1).describe("Chain ID to simulate on"),
-      from: z.string().describe("Sender address"),
-      to: z.string().describe("Target contract address"),
+      from: evmAddress.describe("Sender address"),
+      to: evmAddress.describe("Target contract address"),
       data: z.string().describe("Transaction calldata (hex)"),
       value: z.string().default("0").describe("ETH value to send (in wei)"),
     },
@@ -124,9 +126,9 @@ export function createAegisServer(): McpServer {
     "check_token",
     "Check if a token is safe to trade. Detects honeypot mechanics (can't sell), concentrated holdings, fake ownership renouncement, and other scam indicators. Use this before swapping into any unfamiliar token.",
     {
-      tokenAddress: z.string().describe("The token contract address to check"),
+      tokenAddress: evmAddress.describe("The token contract address to check"),
       chainId: z.number().default(1).describe("Chain ID (1=Ethereum, 8453=Base)"),
-      holderAddress: z.string().optional().describe("Optional: address to check balance for"),
+      holderAddress: evmAddress.optional().describe("Optional: address to check balance for"),
     },
     async ({ tokenAddress, chainId, holderAddress }) => {
       const holder = (holderAddress || "0x0000000000000000000000000000000000000001") as Address;
@@ -169,12 +171,12 @@ export function createAegisServer(): McpServer {
     "Comprehensive risk assessment combining contract scanning, transaction simulation, and token checks. This is the recommended all-in-one safety check before any DeFi interaction. Returns a go/no-go recommendation.",
     {
       action: z.enum(["swap", "approve", "transfer", "interact"]).describe("Type of action being assessed"),
-      targetContract: z.string().describe("The contract being interacted with"),
+      targetContract: evmAddress.describe("The contract being interacted with"),
       chainId: z.number().default(1).describe("Chain ID"),
-      from: z.string().describe("The agent's wallet address"),
+      from: evmAddress.describe("The agent's wallet address"),
       transactionData: z.string().optional().describe("Calldata for the transaction (hex)"),
       value: z.string().default("0").describe("ETH value (in wei)"),
-      tokenAddress: z.string().optional().describe("Token address if this involves a token swap"),
+      tokenAddress: evmAddress.optional().describe("Token address if this involves a token swap"),
     },
     async ({ action, targetContract, chainId, from, transactionData, value, tokenAddress }) => {
       const checks: Record<string, any> = {};
@@ -247,16 +249,19 @@ export function createAegisServer(): McpServer {
 
       const decision = overallRisk >= 70 ? "BLOCK" : overallRisk >= 40 ? "WARN" : "ALLOW";
 
-      // If not blocked, sign an attestation for on-chain verification
+      // If not blocked, sign attestations for on-chain verification
       let attestation: Record<string, string> | undefined;
+      let hookAttestation: Record<string, string> | undefined;
       if (decision !== "BLOCK") {
         try {
           const selector = transactionData ? transactionData.slice(0, 10) as Hex : "0x00000000" as Hex;
+          // Gateway attestation
           const att = await signAttestation({
             agent: from as Address,
             target: targetContract as Address,
             selector,
             riskScore: overallRisk,
+            chainId,
           });
           attestation = {
             attestationId: att.attestationId,
@@ -267,8 +272,23 @@ export function createAegisServer(): McpServer {
             expiresAt: att.expiresAt.toString(),
             signature: att.signature,
           };
+          // Hook attestation (for Uniswap v4 hook-protected pools)
+          const hookAtt = await signHookAttestation({
+            agent: from as Address,
+            target: targetContract as Address,
+            selector,
+            riskScore: overallRisk,
+            chainId,
+          });
+          hookAttestation = {
+            attestationId: hookAtt.attestationId,
+            agent: hookAtt.agent,
+            riskScore: hookAtt.riskScore.toString(),
+            expiresAt: hookAtt.expiresAt.toString(),
+            signature: hookAtt.signature,
+          };
         } catch {
-          // Attester key not configured - attestation unavailable
+          // Attester key not configured - attestations unavailable
           // MCP-only mode still works (agent gets the risk assessment)
         }
       }
@@ -334,6 +354,7 @@ export function createAegisServer(): McpServer {
             traceSummary,
             soloditCrossRef,
             attestation,
+            hookAttestation,
             recommendation: decision === "BLOCK"
               ? "DO NOT proceed with this transaction. High risk of fund loss."
               : decision === "WARN"
@@ -351,8 +372,8 @@ export function createAegisServer(): McpServer {
     "Trace a transaction to discover every contract it touches internally. Uses debug_traceCall to extract the full call tree, then scans each unique contract for exploit patterns. Use this for deep inspection of multi-contract interactions (e.g., swaps routing through many pools).",
     {
       chainId: z.number().default(1).describe("Chain ID to trace on"),
-      from: z.string().describe("Sender address"),
-      to: z.string().describe("Target contract address"),
+      from: evmAddress.describe("Sender address"),
+      to: evmAddress.describe("Target contract address"),
       data: z.string().describe("Transaction calldata (hex)"),
       value: z.string().default("0").describe("ETH value to send (in wei)"),
     },
