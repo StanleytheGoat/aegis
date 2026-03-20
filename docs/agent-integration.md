@@ -127,7 +127,7 @@ Analyze a smart contract's source code or bytecode for known exploit patterns.
 
 *At least one of `source`, `bytecode`, or `contractAddress` must be provided.
 
-**Detects 12 exploit patterns:**
+**Detects 22 exploit patterns:**
 | Pattern | Severity |
 |---------|----------|
 | Asymmetric sell tax (50-99%) | Critical |

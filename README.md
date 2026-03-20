@@ -53,7 +53,7 @@ Aegis Risk Assessment
 ## What's in the box
 
 **MCP Server** (TypeScript)
-- `scan_contract` - pattern matching against 12 known exploit types
+- `scan_contract` - pattern matching against 22 known exploit types
 - `simulate_transaction` - dry-run on a forked chain
 - `check_token` - anti-honeypot checks (sellability, concentrated holdings)
 - `assess_risk` - all of the above combined into one call. Returns a signed attestation for ALLOW/WARN decisions (falls back to MCP-only mode if no attester key configured)

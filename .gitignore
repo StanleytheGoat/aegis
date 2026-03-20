@@ -12,3 +12,4 @@ deployment.json
 coverage/
 typechain-types/
 .npmrc
+.aegis-status.json

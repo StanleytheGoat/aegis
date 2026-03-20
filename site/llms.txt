@@ -6,7 +6,7 @@
 
 Aegis protects autonomous AI agents from DeFi exploits. It sits between the agent's decision to trade and the actual on-chain execution, providing three layers of defense:
 
-1. **Static Analysis** - Scans contract source code and bytecode against 12 known exploit patterns (honeypots, rug pulls, reentrancy, fake ownership renounce, etc.)
+1. **Static Analysis** - Scans contract source code and bytecode against 22 known exploit patterns (honeypots, rug pulls, reentrancy, fake ownership renounce, etc.)
 2. **Transaction Simulation** - Forks the target chain and simulates the transaction to detect reverts, abnormal gas usage, and hidden state changes before any real funds move.
 3. **On-Chain Enforcement** - AegisGateway smart contract and Uniswap v4 hook that enforce safety checks at the protocol level, with an immutable cold wallet for fee collection.
 
@@ -63,6 +63,16 @@ Comprehensive all-in-one risk assessment. Recommended before any DeFi interactio
 10. Upgradeable Proxy (medium) - Logic can change post-deploy
 11. Flash Loan Vulnerability (high) - Manipulable price oracles
 12. Permit/Approval Phishing (high) - Approval-draining mechanics
+13. Metamorphic Contract (critical) - CREATE2 + SELFDESTRUCT redeployment attack
+14. Hidden Balance Modifier (critical) - Direct balance manipulation by owner
+15. Hidden Fee Modifier (high) - Dynamic tax changes post-launch
+16. Hidden Transfer Drain (critical) - Owner drains holder balances
+17. Oracle Manipulation (critical) - Flash loan price attacks via spot reserves
+18. Transfer Callback Trap (critical) - Delayed honeypot activation
+19. MEV Sandwich Risk (high) - Low liquidity sandwich attack vulnerability
+20. Malicious Permit (high) - Permit approving wrong address
+21. Unaudited LP Locker (high) - Owner emergency withdraw on LP locks
+22. Burn Price Manipulation (high) - Owner burns from LP to inflate price
 
 ## Integration
 
