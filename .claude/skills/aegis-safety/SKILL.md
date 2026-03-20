@@ -13,6 +13,8 @@ description: DeFi safety analysis skill for Aegis. Triggers on: contract scan, s
 4. For transaction simulation, use `simulate_transaction` with the full calldata
 5. For token checks, use `check_token` with the token address
 6. For comprehensive assessment, use `assess_risk` which combines all checks
+7. For trace analysis of multi-contract txs, use `trace_transaction`
+8. If `SOLODIT_API_KEY` is set, `assess_risk` auto-enriches findings with real audit data. Use `search_solodit` to manually query 50K+ audit findings from Cyfrin, Sherlock, Code4rena, Trail of Bits, and OpenZeppelin
 
 ## Risk Score Interpretation
 

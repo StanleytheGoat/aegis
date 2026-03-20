@@ -10,7 +10,8 @@ Run a complete Aegis safety analysis on a contract or token address.
 1. Use the `scan_contract` MCP tool to analyze the bytecode and source code for exploit patterns
 2. Use the `check_token` MCP tool to evaluate token-specific risks (honeypot, hidden fees, transfer traps)
 3. Use the `assess_risk` MCP tool for a comprehensive risk assessment combining all signals
-4. Present results in this format:
+4. If `SOLODIT_API_KEY` is configured, use `search_solodit` to cross-reference any detected patterns against real-world audit findings
+5. Present results in this format:
 
 ```
 AEGIS SAFETY SCAN
@@ -26,9 +27,12 @@ Patterns Matched:
 Token Analysis:
 - <token findings>
 
+Solodit Cross-References:
+- <matching real-world audit findings, if SOLODIT_API_KEY is set>
+
 Recommendation:
 <clear action recommendation>
 ```
 
-5. If risk score >= 50, explicitly warn that this contract should NOT be interacted with
-6. If risk score < 25, confirm it appears safe but note that no scan is 100% comprehensive
+6. If risk score >= 50, explicitly warn that this contract should NOT be interacted with
+7. If risk score < 25, confirm it appears safe but note that no scan is 100% comprehensive

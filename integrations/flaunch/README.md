@@ -100,7 +100,7 @@ See [example.ts](./example.ts) for a complete working example of a Flaunch tradi
 
 ## Skill file
 
-See [skill.md](./skill.md) for a skill file that teaches an AI agent how to safely trade on Flaunch using Aegis.
+See [skill.md](./skill.md) for a skill file that teaches an AI agent how to safely trade on Flaunch using Aegis. Optionally set `SOLODIT_API_KEY` to cross-reference detected risks against 50K+ real audit findings (free key at solodit.cyfrin.io).
 
 ## Environment variables
 

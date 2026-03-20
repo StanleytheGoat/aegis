@@ -43,6 +43,15 @@ You have access to these tools via the Aegis MCP server:
 - `chainId`: 8453
 - Returns: `{ riskScore: number, riskLevel: string, findings: [...], recommendation: "proceed" | "caution" | "avoid" }`
 
+**search_solodit** - Cross-reference findings against 50K+ real audit reports from top security firms. Requires `SOLODIT_API_KEY` (free at solodit.cyfrin.io).
+- `keywords`: Search term (e.g., "honeypot", "reentrancy")
+- `impact`: Severity filter (default: ["HIGH", "MEDIUM"])
+- Returns: `{ findings: [{ title, severity, url }], totalResults: number }`
+
+**trace_transaction** - Trace every internal call in a multi-contract swap.
+- Same params as simulate_transaction
+- Returns: per-contract risk scores across the full call tree
+
 **simulate_transaction** - Dry-run a transaction on a forked chain.
 - `chainId`: 8453
 - `from`: Agent wallet address

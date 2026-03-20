@@ -34,7 +34,8 @@ npm install aegis-defi
       "args": ["aegis-defi"],
       "env": {
         "ETHERSCAN_API_KEY": "your_key",
-        "ETH_RPC_URL": "https://your-rpc.com"
+        "ETH_RPC_URL": "https://your-rpc.com",
+        "SOLODIT_API_KEY": "sk_your_key (optional, free at solodit.cyfrin.io)"
       }
     }
   }
