@@ -15,3 +15,8 @@ coverage/
 typechain-types/
 .npmrc
 .aegis-status.json
+.claude/commands/
+.claude/hooks/
+.claude/skills/
+outreach/
+scripts/deploy.ts
