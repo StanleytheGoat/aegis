@@ -224,6 +224,45 @@ See [Project Integration Guide](./project-integration.md) for contract details.
 | `ETH_RPC_URL` | Ethereum mainnet RPC | `https://eth.llamarpc.com` |
 | `BASE_RPC` | Base mainnet RPC | `https://mainnet.base.org` |
 | `BASE_SEPOLIA_RPC` | Base Sepolia RPC | `https://sepolia.base.org` |
+| `SOLODIT_API_KEY` | Enables Solodit cross-referencing (see below) | (none) |
+
+---
+
+## Enhanced Scanning with Solodit
+
+Aegis can cross-reference its scan findings against [Solodit](https://solodit.cyfrin.io)'s database of 50,000+ real-world smart contract audit findings from top security firms (Cyfrin, Sherlock, Code4rena, Trail of Bits, OpenZeppelin, and others).
+
+**Without a key:** Aegis works fully -- all 6 tools, 165 exploit patterns, transaction simulation, trace analysis. Solodit enrichment is simply skipped.
+
+**With a key:** When `assess_risk` detects findings, it automatically queries Solodit for matching real-world audit reports and includes them in the response. The `search_solodit` tool also becomes available for manual queries (e.g., "has this type of vulnerability been seen in production audits before?").
+
+### How to get a Solodit API key
+
+1. Go to [solodit.cyfrin.io](https://solodit.cyfrin.io) and create a free account
+2. Click your profile dropdown (top right) and select **API Keys**
+3. Generate a new key (starts with `sk_`)
+4. Set it in your environment:
+   ```bash
+   export SOLODIT_API_KEY=sk_your_key_here
+   ```
+   Or add it to your MCP server config:
+   ```json
+   {
+     "mcpServers": {
+       "aegis": {
+         "command": "npx",
+         "args": ["aegis-defi"],
+         "env": {
+           "SOLODIT_API_KEY": "sk_your_key_here"
+         }
+       }
+     }
+   }
+   ```
+
+### Rate limits
+
+Each API key gets 20 requests per 60-second window. Aegis caches results for 5 minutes and caps enrichment queries to 5 per scan, so normal usage stays well within limits. Each agent operator uses their own key and their own quota -- there is no shared key.
 
 ---
 

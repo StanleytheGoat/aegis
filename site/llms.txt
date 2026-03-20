@@ -117,7 +117,7 @@ const server = createAegisServer();
 
 ### Environment variables
 - `ETHERSCAN_API_KEY` - For fetching verified contract source from Etherscan/Basescan
-- `SOLODIT_API_KEY` - For cross-referencing findings against real audit data (free at solodit.cyfrin.io)
+- `SOLODIT_API_KEY` - Optional. Enables cross-referencing findings against 50K+ real audit results from Solodit. Free, self-service key at solodit.cyfrin.io (profile > API Keys). Each agent operator uses their own key (20 req/min). Without a key, all other tools work fully -- Solodit enrichment is simply skipped
 
 ## On-Chain
 
