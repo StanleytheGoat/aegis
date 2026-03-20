@@ -1207,15 +1207,56 @@
       <span class="section-label fade-in">Architecture</span>
       <h2 class="section-title fade-in">End-to-end safety pipeline</h2>
 
-      <div class="fade-in" style="margin-top: 3rem; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow-x: auto;">
-        <pre style="font-family: var(--mono); font-size: 0.8125rem; line-height: 1.8; color: var(--text-muted); text-align: center; white-space: pre;">
-<span style="color: var(--text);">AI Agent</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: var(--accent);">MCP Server</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #c792ea;">Risk Engine</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #ffcb6b;">Attester</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #82aaff;">Gateway</span>  <span style="color: var(--text-dim);">--></span>  <span style="color: #ff6b9d;">Pool</span>
-<span style="color: var(--text-dim);">  Claude         4 tools          22 patterns       Signs           Verifies        Executes
-  GPT            scan_contract    Static analysis   attestation     + 5 bps fee     swap
-  Any agent      simulate_tx      Bytecode check    (chainId-bound) Safe multisig   Uniswap v4
-                 check_token      Fork simulation
-                 assess_risk</span>
-        </pre>
+      <div class="fade-in" style="margin-top: 3rem; padding: 2rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow-x: auto;">
+        <div style="display: flex; align-items: flex-start; justify-content: center; gap: 0; min-width: 720px;">
+
+          <!-- AI Agent -->
+          <div style="text-align: center; flex: 1; min-width: 100px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: var(--text); margin-bottom: 0.75rem;">AI Agent</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Claude<br>GPT<br>Any agent</div>
+          </div>
+
+          <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
+
+          <!-- MCP Server -->
+          <div style="text-align: center; flex: 1; min-width: 110px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: var(--accent); margin-bottom: 0.75rem;">MCP Server</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">4 tools<br>scan_contract<br>simulate_tx<br>check_token<br>assess_risk</div>
+          </div>
+
+          <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
+
+          <!-- Risk Engine -->
+          <div style="text-align: center; flex: 1; min-width: 110px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: #c792ea; margin-bottom: 0.75rem;">Risk Engine</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">22 patterns<br>Static analysis<br>Bytecode check<br>Fork simulation</div>
+          </div>
+
+          <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
+
+          <!-- Attester -->
+          <div style="text-align: center; flex: 1; min-width: 110px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: #ffcb6b; margin-bottom: 0.75rem;">Attester</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Signs<br>attestation<br>(chainId-bound)</div>
+          </div>
+
+          <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
+
+          <!-- Gateway -->
+          <div style="text-align: center; flex: 1; min-width: 100px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: #82aaff; margin-bottom: 0.75rem;">Gateway</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Verifies<br>+ 5 bps fee<br>Safe multisig</div>
+          </div>
+
+          <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
+
+          <!-- Pool -->
+          <div style="text-align: center; flex: 1; min-width: 80px;">
+            <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: #ff6b9d; margin-bottom: 0.75rem;">Pool</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Executes<br>swap<br>Uniswap v4</div>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>
