@@ -72,22 +72,52 @@ Aegis Risk Assessment
 
 ## What it catches
 
-| Pattern | Severity |
-|---------|----------|
-| Asymmetric sell tax (50-99%) | Critical |
-| Sell pause mechanism | Critical |
-| Fake ownership renounce | Critical |
-| Reentrancy | Critical |
-| Hidden admin functions | High |
-| Unrestricted minting | High |
-| Hidden max sell amount | High |
-| Flash loan / oracle manipulation | High |
-| Permit/approval phishing | High |
-| Blacklist mechanism | Medium |
-| Upgradeable proxy | Medium |
-| Unlimited approval | Medium |
+| # | Pattern | Severity |
+|---|---------|----------|
+| 1 | Asymmetric sell tax (50-99%) | Critical |
+| 2 | Sell pause mechanism | Critical |
+| 3 | Fake ownership renounce | Critical |
+| 4 | Reentrancy | Critical |
+| 5 | Metamorphic contract | Critical |
+| 6 | Hidden balance modifier | Critical |
+| 7 | Hidden fee modifier | Critical |
+| 8 | Hidden transfer drain | Critical |
+| 9 | Delegatecall injection | Critical |
+| 10 | Hidden admin functions | High |
+| 11 | Unrestricted minting | High |
+| 12 | Hidden max sell amount | High |
+| 13 | Flash loan vulnerability | High |
+| 14 | Permit/approval phishing | High |
+| 15 | Transfer callback trap | High |
+| 16 | MEV sandwich risk | High |
+| 17 | Oracle manipulation | High |
+| 18 | Malicious permit | High |
+| 19 | Cross-function reentrancy | High |
+| 20 | Blacklist mechanism | Medium |
+| 21 | Upgradeable proxy / storage collision | Medium |
+| 22 | Unlimited approval | Medium |
 
-What it does NOT catch: novel zero-days, social engineering, MEV/sandwich attacks, governance attacks.
+Plus 13 more patterns added in v0.2.0: metamorphic contract, hidden balance modifier, hidden fee modifier, hidden transfer drain, oracle manipulation, transfer callback trap, MEV sandwich risk, malicious permit, unaudited LP locker, burn price manipulation, proxy storage collision, delegatecall injection, and cross-function reentrancy.
+
+See the full list in [.claude/skills/aegis-safety/references/PATTERNS.md](.claude/skills/aegis-safety/references/PATTERNS.md).
+
+## v0.2.0 - What's New
+
+- **22 exploit patterns** (up from 12) - covers metamorphic contracts, oracle manipulation, MEV sandwich, and more
+- **Agent Skills** - installable skill files for Claude Code with progressive disclosure and trigger-based activation
+- **Slash commands** - `/scan`, `/status`, `/pitch`, `/incident` for common operations
+- **Pre-push security hook** - blocks git pushes containing leaked secrets
+- **Flaunch SDK integration** - safety scanning for memecoin launches on Uniswap v4 pools
+- **Case studies** - Aave $50M swap disaster, Cork Protocol $11M exploit, Moonwell $1.78M oracle attack
+- **Architecture diagram** on landing page showing the full safety pipeline
+
+## Case Studies
+
+**Aave $50M Swap Disaster (March 2026)** - A whale swapped $50M USDT for AAVE tokens via CoW Protocol, routed through a pool with only $73K liquidity. MEV bots extracted $34M. Aegis's `simulate_transaction` would flag the extreme price impact and return BLOCK.
+
+**Cork Protocol $11M Exploit (May 2025)** - Missing access controls in CorkHook.beforeSwap() on Uniswap v4. Exactly the vulnerability AegisSafetyHook prevents by requiring valid attestation before any swap.
+
+**Moonwell $1.78M Oracle Attack (Feb 2026)** - Oracle misconfiguration on Base priced cbETH incorrectly. Pattern 17 (Oracle Manipulation) would detect inline reserve-based pricing.
 
 ## Tests
 
@@ -144,11 +174,25 @@ Built following [ethskills](https://github.com/austintgriffith/ethskills) Ethere
 - Fee flow testing on testnet required deploying a helper contract (EthReceiver) because `executeProtected` forwards calls to the target.
 - Added comprehensive security hardening: ecrecover address(0) checks, EIP-2 s-value malleability enforcement, zero-address validation on attester, nonReentrant on withdrawFees, immutable hook owner, and rescueStuckEth() for ETH recovery.
 
+## Agent Skills
+
+Aegis includes installable [Agent Skills](https://agentskills.io/specification) in `.claude/skills/`:
+
+| Skill | Triggers On |
+|-------|-------------|
+| `aegis-safety` | contract scan, risk assessment, exploit detection, honeypot, simulate transaction |
+| `aegis-contracts` | deploy, gateway, hook, Solidity, CREATE2, Basescan |
+| `aegis-monitoring` | monitor, alert, incident, fee balance, status check |
+
+Skills use 3-tier progressive disclosure: metadata at startup, full instructions when task matches, reference files on-demand.
+
+Slash commands: `/scan <address>`, `/status`, `/pitch <company>`, `/incident <description>`
+
 ## Built for
 
 [The Synthesis](https://synthesis.org) - Ethereum Foundation Hackathon, March 2026
 
-Tracks: Agents that trust, Agents that pay
+Tracks: Open Track, Uniswap API, Autonomous Trading, Agent Services on Base, ERC-8004
 
 ## License
 
