@@ -24,6 +24,7 @@ import {
 } from "../risk-engine/simulator.js";
 import { traceTransaction, filterScanTargets, isWellKnown } from "../risk-engine/tracer.js";
 import { signAttestation, generateAttestationId } from "../risk-engine/attester.js";
+import { enrichWithSolodit, querySolodit } from "../risk-engine/solodit.js";
 import type { Address, Hex } from "viem";
 
 export function createAegisServer(): McpServer {
@@ -296,6 +297,31 @@ export function createAegisServer(): McpServer {
         };
       }
 
+      // 5. Enrich with Solodit cross-references if we have findings
+      let soloditCrossRef: any = undefined;
+      const allFindings = checks.contractScan?.findings || [];
+      if (allFindings.length > 0) {
+        try {
+          const enriched = await enrichWithSolodit(allFindings);
+          if (enriched.crossReferenceCount > 0) {
+            soloditCrossRef = {
+              matchCount: enriched.crossReferenceCount,
+              queries: enriched.soloditMatches.map((m) => ({
+                query: m.query,
+                resultCount: m.totalResults,
+                topFindings: m.findings.map((f) => ({
+                  title: f.title,
+                  severity: f.severity,
+                  url: f.url,
+                })),
+              })),
+            };
+          }
+        } catch {
+          // Solodit enrichment is best-effort
+        }
+      }
+
       return {
         content: [{
           type: "text" as const,
@@ -306,6 +332,7 @@ export function createAegisServer(): McpServer {
             action,
             checks,
             traceSummary,
+            soloditCrossRef,
             attestation,
             recommendation: decision === "BLOCK"
               ? "DO NOT proceed with this transaction. High risk of fund loss."
@@ -441,6 +468,38 @@ export function createAegisServer(): McpServer {
     },
   );
 
+  // --- Tool: search_solodit ---
+  server.tool(
+    "search_solodit",
+    "Search Solodit's database of 50,000+ real-world smart contract audit findings from top firms (Cyfrin, Sherlock, Code4rena, Trail of Bits, OpenZeppelin). Cross-reference vulnerability types, protocols, or attack patterns against known audit results.",
+    {
+      keywords: z.string().describe("Search keywords (e.g., 'reentrancy', 'flash loan oracle', 'Uniswap')"),
+      impact: z.array(z.string()).default(["HIGH", "MEDIUM"]).describe("Severity filter: HIGH, MEDIUM, LOW, GAS"),
+      pageSize: z.number().default(10).describe("Number of results to return (max 20)"),
+    },
+    async ({ keywords, impact, pageSize }) => {
+      try {
+        const result = await querySolodit(keywords, { impact, pageSize: Math.min(pageSize, 20) });
+        return {
+          content: [{
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          }],
+        };
+      } catch (err: any) {
+        return {
+          content: [{
+            type: "text" as const,
+            text: JSON.stringify({
+              error: `Solodit search failed: ${err.message}`,
+              hint: "Ensure SOLODIT_API_KEY is set in environment",
+            }),
+          }],
+        };
+      }
+    },
+  );
+
   // --- Resource: safety report ---
   server.resource(
     "aegis-info",
@@ -458,6 +517,7 @@ export function createAegisServer(): McpServer {
           "- check_token: Anti-honeypot and token safety checks",
           "- assess_risk: Comprehensive all-in-one risk assessment (now with trace analysis)",
           "- trace_transaction: Trace all internal calls and scan every contract touched",
+          "- search_solodit: Search 50K+ real-world audit findings from top security firms",
           "",
           "Supported chains: Ethereum (1), Base (8453), Base Sepolia (84532)",
           "",

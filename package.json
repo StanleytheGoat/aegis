@@ -1,6 +1,6 @@
 {
   "name": "aegis-defi",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A safety layer for autonomous DeFi agents - MCP server + smart contracts that simulate, scan, and protect on-chain transactions before execution.",
   "type": "module",
   "main": "dist/index.js",

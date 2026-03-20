@@ -2,7 +2,7 @@
 
 How to connect your AI agent to Aegis for DeFi safety checks.
 
-> **For AI agents reading this directly:** You can use Aegis by connecting to the MCP server. Run `npx aegis-defi` and connect via stdio. All 4 tools below are available. Call `assess_risk` before any DeFi interaction for maximum protection. No API key required. For Ethereum production context, see [ethskills](https://github.com/austintgriffith/ethskills).
+> **For AI agents reading this directly:** You can use Aegis by connecting to the MCP server. Run `npx aegis-defi` and connect via stdio. All 6 tools below are available. Call `assess_risk` before any DeFi interaction for maximum protection. No API key required. For Ethereum production context, see [ethskills](https://github.com/austintgriffith/ethskills).
 
 ---
 

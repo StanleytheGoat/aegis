@@ -109,6 +109,30 @@ vi.mock("../risk-engine/simulator.js", () => ({
   })),
 }));
 
+vi.mock("../risk-engine/solodit.js", () => ({
+  enrichWithSolodit: vi.fn(async (findings: any[]) => ({
+    aegisFindings: findings,
+    soloditMatches: [],
+    crossReferenceCount: 0,
+  })),
+  querySolodit: vi.fn(async (keywords: string) => ({
+    query: keywords,
+    totalResults: 1,
+    findings: [
+      {
+        title: "Mock Solodit Finding",
+        severity: "HIGH",
+        tags: ["Reentrancy"],
+        protocolCategory: "DeFi",
+        qualityScore: 85,
+        slug: "mock-finding-1",
+        url: "https://solodit.cyfrin.io/issues/mock-finding-1",
+      },
+    ],
+    cached: false,
+  })),
+}));
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -140,12 +164,14 @@ describe("MCP Server", () => {
     expect(server).toBeDefined();
   });
 
-  it("should register all four tools", () => {
+  it("should register all six tools", () => {
     const tools = (server as any)._registeredTools as Record<string, unknown>;
     expect(tools["scan_contract"]).toBeDefined();
     expect(tools["simulate_transaction"]).toBeDefined();
     expect(tools["check_token"]).toBeDefined();
     expect(tools["assess_risk"]).toBeDefined();
+    expect(tools["trace_transaction"]).toBeDefined();
+    expect(tools["search_solodit"]).toBeDefined();
   });
 
   // -----------------------------------------------------------------------
@@ -562,6 +588,35 @@ describe("MCP Server", () => {
       expect(data).toHaveProperty("checks");
       expect(data).toHaveProperty("recommendation");
       expect(["ALLOW", "WARN", "BLOCK"]).toContain(data.decision);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // search_solodit
+  // -----------------------------------------------------------------------
+  describe("search_solodit", () => {
+    it("should return findings from Solodit", async () => {
+      const result = await callTool(server, "search_solodit", {
+        keywords: "reentrancy",
+        impact: ["HIGH"],
+        pageSize: 5,
+      });
+      const data = parseToolResult(result);
+      expect(data.query).toBe("reentrancy");
+      expect(data.findings).toBeInstanceOf(Array);
+      expect(data.findings.length).toBeGreaterThan(0);
+      expect(data.findings[0].title).toBe("Mock Solodit Finding");
+    });
+
+    it("should cap pageSize at 20", async () => {
+      const { querySolodit } = await import("../risk-engine/solodit.js");
+      await callTool(server, "search_solodit", {
+        keywords: "oracle",
+        pageSize: 50,
+      });
+      expect(querySolodit).toHaveBeenCalledWith("oracle", expect.objectContaining({
+        pageSize: 20,
+      }));
     });
   });
 

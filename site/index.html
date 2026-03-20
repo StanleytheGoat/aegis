@@ -318,12 +318,12 @@
                 <span class="material-symbols-outlined text-5xl text-primary mb-6 glow-gold">shield_with_heart</span>
                 <h3 class="text-3xl font-bold text-on-surface mb-4 font-headline">MCP Safety Server</h3>
                 <p class="text-on-surface-variant text-lg max-w-md leading-relaxed">
-                  One command adds four safety tools to Claude, GPT, or any MCP-compatible agent. Your agent calls scan_contract, simulate_transaction, check_token, or assess_risk before every trade.
+                  One command adds six safety tools to Claude, GPT, or any MCP-compatible agent. Your agent calls scan_contract, simulate_transaction, check_token, assess_risk, trace_transaction, or search_solodit before every trade.
                 </p>
               </div>
               <div class="mt-12 flex gap-4 flex-wrap">
                 <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">MCP Protocol</div>
-                <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">4 Safety Tools</div>
+                <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">6 Safety Tools</div>
                 <div class="px-4 py-2 rounded-lg bg-surface-variant text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Any LLM Agent</div>
               </div>
             </div>
@@ -373,6 +373,8 @@
                   <p><span class="c-cm">#   simulate_transaction</span></p>
                   <p><span class="c-cm">#   check_token</span></p>
                   <p><span class="c-cm">#   assess_risk</span></p>
+                  <p><span class="c-cm">#   trace_transaction</span></p>
+                  <p><span class="c-cm">#   search_solodit</span></p>
                 </div>
               </div>
             </div>
@@ -482,10 +484,12 @@
 <span class="c-type">$</span> npx aegis-defi
 
 <span class="c-cm"># Your agent now has 4 safety tools:</span>
-<span class="c-cm">#   scan_contract      - Static analysis for 165 exploit patterns</span>
+<span class="c-cm">#   scan_contract        - Static analysis for 165 exploit patterns</span>
 <span class="c-cm">#   simulate_transaction - Forked-chain tx simulation</span>
-<span class="c-cm">#   check_token        - Anti-honeypot token checks</span>
-<span class="c-cm">#   assess_risk        - All-in-one risk assessment</span></pre>
+<span class="c-cm">#   check_token          - Anti-honeypot token checks</span>
+<span class="c-cm">#   assess_risk          - All-in-one risk assessment</span>
+<span class="c-cm">#   trace_transaction    - Multi-contract call tree analysis</span>
+<span class="c-cm">#   search_solodit       - Cross-ref 50K+ real audit findings</span></pre>
             </div>
           </div>
 
@@ -517,7 +521,8 @@
 
 <span class="c-cm">// The server exposes 4 tools:</span>
 <span class="c-cm">//   scan_contract, simulate_transaction,</span>
-<span class="c-cm">//   check_token, assess_risk</span>
+<span class="c-cm">//   check_token, assess_risk,</span>
+<span class="c-cm">//   trace_transaction, search_solodit</span>
 <span class="c-cm">// assess_risk returns signed attestations for</span>
 <span class="c-cm">// ALLOW/WARN decisions (chainId-bound signatures)</span></pre>
             </div>
@@ -638,7 +643,7 @@
             <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
             <div class="text-center flex-1 min-w-[90px]">
               <div class="text-[13px] font-bold font-headline mb-2 text-primary">MCP Server</div>
-              <div class="text-[11px] text-outline leading-relaxed">4 tools<br>scan_contract<br>simulate_tx<br>check_token<br>assess_risk</div>
+              <div class="text-[11px] text-outline leading-relaxed">6 tools<br>scan_contract<br>simulate_tx<br>check_token<br>assess_risk<br>trace_tx<br>search_solodit</div>
             </div>
             <div class="text-outline text-lg pt-0.5 shrink-0">&rarr;</div>
             <div class="text-center flex-1 min-w-[90px]">

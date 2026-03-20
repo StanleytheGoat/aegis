@@ -57,6 +57,8 @@ Aegis Risk Assessment
 - `simulate_transaction` - dry-run on a forked chain
 - `check_token` - anti-honeypot checks (sellability, concentrated holdings)
 - `assess_risk` - all of the above combined into one call. Returns a signed attestation for ALLOW/WARN decisions (falls back to MCP-only mode if no attester key configured)
+- `trace_transaction` - traces every internal call in a multi-contract transaction, scans each contract individually
+- `search_solodit` - cross-references findings against 50,000+ real-world audit results from Cyfrin, Sherlock, Code4rena, Trail of Bits, and others via the Solodit API
 
 **Smart Contracts** (Solidity)
 - `AegisGateway` - safety wrapper for any DeFi interaction. Verifies attestations, checks risk scores, collects fees. Fees go to a Safe multisig that can never be changed, even by the contract owner. Signatures include chain ID + contract address to prevent cross-chain replay. ecrecover validates against address(0), EIP-2 s-value malleability check enforced, and `withdrawFees` is protected by `nonReentrant`. Includes `rescueStuckEth()` for ETH sent directly to `receive()`.
@@ -64,7 +66,7 @@ Aegis Risk Assessment
 - `MockHoneypot` - a deliberately evil token for testing. Aegis scores it 100/100.
 
 **Paperclip Integration**
-- Aegis works as a safety skill in [Paperclip](https://github.com/paperclipai/paperclip) zero-human companies. Any company doing DeFi operations can plug Aegis in as a mandatory pre-transaction check. See [paperclip/](./paperclip/) for the skill definition.
+- Aegis works as a safety skill in [Paperclip](https://github.com/paperclipai/paperclip) zero-human companies. Any company doing DeFi operations can plug Aegis in as a mandatory pre-transaction check.
 
 **Deployed on Base Mainnet:**
 - AegisGateway: [`0x62c64c063ddbcd438f924184c03d8dad45230fa3`](https://basescan.org/address/0x62c64c063ddbcd438f924184c03d8dad45230fa3#code)
@@ -150,7 +152,6 @@ At scale, if 5% of agent transaction volume on Base flows through Aegis, that's 
 
 - [Agent Integration Guide](./docs/agent-integration.md) - how to connect your agent (for both AI agents and human developers)
 - [Project Integration Guide](./docs/project-integration.md) - how to integrate Aegis into a product
-- [Paperclip Skill](./paperclip/) - how to add Aegis to a Paperclip zero-human company
 - [llms.txt](./site/llms.txt) - machine-readable description for agentic search
 
 ## Security practices

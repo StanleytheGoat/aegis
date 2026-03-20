@@ -12,7 +12,7 @@ Aegis protects autonomous AI agents from DeFi exploits. It sits between the agen
 
 ## Tools
 
-Aegis exposes 4 MCP tools:
+Aegis exposes 6 MCP tools:
 
 ### scan_contract
 Analyze a smart contract for exploit patterns.
@@ -47,7 +47,23 @@ Comprehensive all-in-one risk assessment. Recommended before any DeFi interactio
 - `transactionData` (string, optional): Calldata (hex)
 - `value` (string, default: "0"): ETH value in wei
 - `tokenAddress` (string, optional): Token address for swap actions
-- Returns: decision (ALLOW, WARN, BLOCK), overall risk score, risk factors, per-check details, recommendation, signed attestation (for ALLOW/WARN)
+- Returns: decision (ALLOW, WARN, BLOCK), overall risk score, risk factors, per-check details, Solodit cross-references, recommendation, signed attestation (for ALLOW/WARN)
+
+### trace_transaction
+Trace every internal call in a multi-contract transaction. Uses debug_traceCall to extract the full call tree, then scans each unique non-well-known contract.
+- `chainId` (number, default: 1): Chain ID
+- `from` (string, required): Sender address
+- `to` (string, required): Target contract address
+- `data` (string, required): Transaction calldata (hex)
+- `value` (string, default: "0"): ETH value in wei
+- Returns: full call tree, per-contract risk scores, unique contracts count, max risk across all contracts
+
+### search_solodit
+Search 50,000+ real-world smart contract audit findings from top security firms (Cyfrin, Sherlock, Code4rena, Trail of Bits, OpenZeppelin) via the Solodit API.
+- `keywords` (string, required): Search keywords (e.g., "reentrancy", "flash loan oracle")
+- `impact` (array, default: ["HIGH", "MEDIUM"]): Severity filter
+- `pageSize` (number, default: 10): Number of results (max 20)
+- Returns: matching audit findings with title, severity, tags, and URLs
 
 ## Exploit Patterns Detected
 
@@ -101,6 +117,7 @@ const server = createAegisServer();
 
 ### Environment variables
 - `ETHERSCAN_API_KEY` - For fetching verified contract source from Etherscan/Basescan
+- `SOLODIT_API_KEY` - For cross-referencing findings against real audit data (free at solodit.cyfrin.io)
 
 ## On-Chain
 
