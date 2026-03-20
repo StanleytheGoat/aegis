@@ -16,7 +16,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { scanContractSource, scanBytecode } from "../risk-engine/scanner.js";
-import { simulateTransaction, checkTokenSellability } from "../risk-engine/simulator.js";
+import {
+  simulateTransaction,
+  simulateWithTrace,
+  checkTokenSellability,
+  fetchContractSource,
+} from "../risk-engine/simulator.js";
+import { traceTransaction, filterScanTargets, isWellKnown } from "../risk-engine/tracer.js";
 import { signAttestation, generateAttestationId } from "../risk-engine/attester.js";
 import type { Address, Hex } from "viem";
 
@@ -180,9 +186,9 @@ export function createAegisServer(): McpServer {
         checks.contractScan = scanBytecode(fetched.bytecode);
       }
 
-      // 2. Simulate the transaction if we have calldata
+      // 2. Simulate the transaction with trace analysis if we have calldata
       if (transactionData) {
-        checks.simulation = await simulateTransaction({
+        checks.simulation = await simulateWithTrace({
           chainId,
           from: from as Address,
           to: targetContract as Address,
@@ -228,6 +234,16 @@ export function createAegisServer(): McpServer {
         risks.push("cannot_sell_token");
       }
 
+      // Include trace-level risk if trace analysis ran
+      if (checks.simulation?.trace) {
+        const traceRisk = checks.simulation.trace.maxRiskScore;
+        overallRisk = Math.max(overallRisk, traceRisk);
+        if (traceRisk >= 70) risks.push("traced_contract_high_risk");
+        if (checks.simulation.riskIndicators?.includes("delegatecall_in_trace")) {
+          risks.push("delegatecall_in_trace");
+        }
+      }
+
       const decision = overallRisk >= 70 ? "BLOCK" : overallRisk >= 40 ? "WARN" : "ALLOW";
 
       // If not blocked, sign an attestation for on-chain verification
@@ -256,6 +272,30 @@ export function createAegisServer(): McpServer {
         }
       }
 
+      // Build trace summary for the output
+      let traceSummary: Record<string, any> | undefined;
+      if (checks.simulation?.trace) {
+        const t = checks.simulation.trace;
+        traceSummary = {
+          fullTrace: t.fullTrace,
+          totalCalls: t.totalCalls,
+          uniqueContracts: t.uniqueContracts,
+          scannedContracts: t.scannedContracts,
+          maxRiskScore: t.maxRiskScore,
+          maxRiskLevel: t.maxRiskLevel,
+          contracts: t.contracts.map((c: any) => ({
+            address: c.address,
+            wellKnown: c.wellKnown,
+            riskScore: c.scanResult?.riskScore ?? null,
+            riskLevel: c.scanResult?.riskLevel ?? (c.wellKnown ? "safe" : "unknown"),
+            callTypes: c.callTypes,
+            maxDepth: c.maxDepth,
+            findingCount: c.scanResult?.findings?.length ?? 0,
+          })),
+          fallbackReason: t.fallbackReason,
+        };
+      }
+
       return {
         content: [{
           type: "text" as const,
@@ -265,12 +305,136 @@ export function createAegisServer(): McpServer {
             riskFactors: risks,
             action,
             checks,
+            traceSummary,
             attestation,
             recommendation: decision === "BLOCK"
               ? "DO NOT proceed with this transaction. High risk of fund loss."
               : decision === "WARN"
               ? "Proceed with caution. Some risk indicators detected."
               : "Transaction appears safe. Proceed normally.",
+          }, null, 2),
+        }],
+      };
+    },
+  );
+
+  // --- Tool: trace_transaction ---
+  server.tool(
+    "trace_transaction",
+    "Trace a transaction to discover every contract it touches internally. Uses debug_traceCall to extract the full call tree, then scans each unique contract for exploit patterns. Use this for deep inspection of multi-contract interactions (e.g., swaps routing through many pools).",
+    {
+      chainId: z.number().default(1).describe("Chain ID to trace on"),
+      from: z.string().describe("Sender address"),
+      to: z.string().describe("Target contract address"),
+      data: z.string().describe("Transaction calldata (hex)"),
+      value: z.string().default("0").describe("ETH value to send (in wei)"),
+    },
+    async ({ chainId, from, to, data, value }) => {
+      // Run the trace
+      const traceResult = await traceTransaction({
+        chainId,
+        from: from as Address,
+        to: to as Address,
+        data: data as Hex,
+        value: BigInt(value),
+      });
+
+      // Scan each non-well-known contract
+      const scanTargets = filterScanTargets(traceResult.uniqueAddresses);
+      const contractResults: Array<{
+        address: string;
+        wellKnown: boolean;
+        riskScore: number | null;
+        riskLevel: string;
+        findings: number;
+        callTypes: string[];
+      }> = [];
+
+      // Build call metadata
+      const callMeta = new Map<string, { callTypes: Set<string>; maxDepth: number }>();
+      for (const call of traceResult.calls) {
+        const lower = call.address.toLowerCase();
+        const existing = callMeta.get(lower);
+        if (existing) {
+          existing.callTypes.add(call.type);
+          existing.maxDepth = Math.max(existing.maxDepth, call.depth);
+        } else {
+          callMeta.set(lower, { callTypes: new Set([call.type]), maxDepth: call.depth });
+        }
+      }
+
+      // Add well-known contracts
+      for (const addr of traceResult.uniqueAddresses) {
+        if (isWellKnown(addr)) {
+          const meta = callMeta.get(addr.toLowerCase());
+          contractResults.push({
+            address: addr,
+            wellKnown: true,
+            riskScore: 0,
+            riskLevel: "safe",
+            findings: 0,
+            callTypes: meta ? Array.from(meta.callTypes) : ["CALL"],
+          });
+        }
+      }
+
+      // Scan non-well-known contracts with rate limiting
+      let maxRisk = 0;
+      for (let i = 0; i < scanTargets.length; i++) {
+        const addr = scanTargets[i];
+        const meta = callMeta.get(addr.toLowerCase());
+        let riskScore: number | null = null;
+        let riskLevel = "unknown";
+        let findings = 0;
+
+        try {
+          const fetched = await fetchContractSource(addr, chainId);
+          if (fetched.source) {
+            const scan = scanContractSource(fetched.source);
+            riskScore = scan.riskScore;
+            riskLevel = scan.riskLevel;
+            findings = scan.findings.length;
+          } else if (fetched.bytecode) {
+            const scan = scanBytecode(fetched.bytecode);
+            riskScore = scan.riskScore;
+            riskLevel = scan.riskLevel;
+            findings = scan.findings.length;
+          }
+        } catch {
+          // fetch failed
+        }
+
+        if (riskScore !== null && riskScore > maxRisk) {
+          maxRisk = riskScore;
+        }
+
+        contractResults.push({
+          address: addr,
+          wellKnown: false,
+          riskScore,
+          riskLevel,
+          findings,
+          callTypes: meta ? Array.from(meta.callTypes) : ["CALL"],
+        });
+
+        // Rate limit
+        if (i < scanTargets.length - 1) {
+          await new Promise((r) => setTimeout(r, 150));
+        }
+      }
+
+      return {
+        content: [{
+          type: "text" as const,
+          text: JSON.stringify({
+            fullTrace: traceResult.fullTrace,
+            fallbackReason: traceResult.fallbackReason,
+            totalCalls: traceResult.calls.length,
+            uniqueContracts: traceResult.uniqueAddresses.length,
+            scannedContracts: contractResults.filter((c) => c.riskScore !== null).length,
+            maxRiskScore: maxRisk,
+            contracts: contractResults,
+            rawCalls: traceResult.calls.slice(0, 50), // cap to avoid huge payloads
           }, null, 2),
         }],
       };
@@ -292,7 +456,8 @@ export function createAegisServer(): McpServer {
           "- scan_contract: Analyze contract source/bytecode for exploit patterns",
           "- simulate_transaction: Simulate a tx on a forked chain",
           "- check_token: Anti-honeypot and token safety checks",
-          "- assess_risk: Comprehensive all-in-one risk assessment",
+          "- assess_risk: Comprehensive all-in-one risk assessment (now with trace analysis)",
+          "- trace_transaction: Trace all internal calls and scan every contract touched",
           "",
           "Supported chains: Ethereum (1), Base (8453), Base Sepolia (84532)",
           "",
@@ -305,49 +470,4 @@ export function createAegisServer(): McpServer {
   return server;
 }
 
-/**
- * Fetch contract source code from Etherscan/Basescan.
- * Uses free API endpoints.
- */
-async function fetchContractSource(
-  address: string,
-  chainId: number,
-): Promise<{ source?: string; bytecode?: string }> {
-  const explorerApis: Record<number, string> = {
-    1: "https://api.etherscan.io/api",
-    8453: "https://api.basescan.org/api",
-    84532: "https://api-sepolia.basescan.org/api",
-  };
-
-  const apiBase = explorerApis[chainId];
-  if (!apiBase) return {};
-
-  const apiKey = process.env.ETHERSCAN_API_KEY || "";
-
-  try {
-    // Try to get verified source
-    const sourceUrl = `${apiBase}?module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
-    const sourceRes = await fetch(sourceUrl);
-    const sourceData = await sourceRes.json();
-
-    if (sourceData.result?.[0]?.SourceCode) {
-      const src = sourceData.result[0].SourceCode;
-      if (src && src !== "") {
-        return { source: src };
-      }
-    }
-
-    // Fallback: get bytecode
-    const codeUrl = `${apiBase}?module=proxy&action=eth_getCode&address=${address}&tag=latest&apikey=${apiKey}`;
-    const codeRes = await fetch(codeUrl);
-    const codeData = await codeRes.json();
-
-    if (codeData.result && codeData.result !== "0x") {
-      return { bytecode: codeData.result };
-    }
-  } catch {
-    // Silently fail - caller will handle missing data
-  }
-
-  return {};
-}
+// fetchContractSource is imported from ../risk-engine/simulator.js

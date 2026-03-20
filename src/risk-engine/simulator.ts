@@ -10,6 +10,8 @@
 
 import { createPublicClient, http, type Address, type Hex, type Chain, parseAbi } from "viem";
 import { mainnet, base, baseSepolia } from "viem/chains";
+import { traceTransaction, filterScanTargets, isWellKnown, type TraceResult, type TraceCall } from "./tracer.js";
+import { scanContractSource, scanBytecode, type ScanResult } from "./scanner.js";
 
 export interface SimulationRequest {
   /** Chain to simulate on */
@@ -40,6 +42,41 @@ export interface SimulationResult {
   riskIndicators: string[];
   /** Estimated gas cost in ETH */
   estimatedCostEth: string;
+  /** Trace analysis of all contracts touched during execution */
+  trace?: TraceAnalysis;
+}
+
+/** Per-contract risk assessment from trace analysis. */
+export interface TracedContract {
+  address: Address;
+  /** Whether this is a well-known contract (skipped scanning) */
+  wellKnown: boolean;
+  /** Scan result if the contract was scanned */
+  scanResult?: ScanResult;
+  /** Call types seen for this address (CALL, DELEGATECALL, etc.) */
+  callTypes: string[];
+  /** Maximum call depth at which this contract appeared */
+  maxDepth: number;
+}
+
+/** Full trace analysis attached to a simulation result. */
+export interface TraceAnalysis {
+  /** Whether debug_traceCall was available */
+  fullTrace: boolean;
+  /** Total number of internal calls */
+  totalCalls: number;
+  /** Number of unique contracts touched */
+  uniqueContracts: number;
+  /** Number of contracts that were actually scanned */
+  scannedContracts: number;
+  /** Per-contract breakdown */
+  contracts: TracedContract[];
+  /** The highest risk score across all traced contracts */
+  maxRiskScore: number;
+  /** The highest risk level across all traced contracts */
+  maxRiskLevel: string;
+  /** If trace fell back, the reason */
+  fallbackReason?: string;
 }
 
 const CHAIN_MAP: Record<number, { chain: Chain; rpcUrl: string }> = {
@@ -212,6 +249,187 @@ export async function checkTokenSellability(
     indicators.push("contract_interaction_failed");
     return { canSell: false, indicators };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Trace-enhanced simulation
+// ---------------------------------------------------------------------------
+
+/** Rate-limit delay between contract fetches to avoid blasting the RPC. */
+const FETCH_DELAY_MS = 150;
+
+/**
+ * Fetch contract source code from Etherscan/Basescan.
+ * Extracted here so both the simulator and MCP server can use it.
+ */
+export async function fetchContractSource(
+  address: string,
+  chainId: number,
+): Promise<{ source?: string; bytecode?: string }> {
+  const explorerApis: Record<number, string> = {
+    1: "https://api.etherscan.io/api",
+    8453: "https://api.basescan.org/api",
+    84532: "https://api-sepolia.basescan.org/api",
+  };
+
+  const apiBase = explorerApis[chainId];
+  if (!apiBase) return {};
+
+  const apiKey = process.env.ETHERSCAN_API_KEY || "";
+
+  try {
+    const sourceUrl = `${apiBase}?module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
+    const sourceRes = await fetch(sourceUrl);
+    const sourceData = await sourceRes.json();
+
+    if (sourceData.result?.[0]?.SourceCode) {
+      const src = sourceData.result[0].SourceCode;
+      if (src && src !== "") {
+        return { source: src };
+      }
+    }
+
+    const codeUrl = `${apiBase}?module=proxy&action=eth_getCode&address=${address}&tag=latest&apikey=${apiKey}`;
+    const codeRes = await fetch(codeUrl);
+    const codeData = await codeRes.json();
+
+    if (codeData.result && codeData.result !== "0x") {
+      return { bytecode: codeData.result };
+    }
+  } catch {
+    // Silently fail -- caller handles missing data
+  }
+
+  return {};
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Run the full simulation pipeline with trace-level analysis.
+ *
+ * 1. Runs the standard simulation (estimateGas + call).
+ * 2. Runs the tracer to extract all internal calls.
+ * 3. For each unique non-well-known contract, fetches source/bytecode and scans.
+ * 4. Aggregates risk: the transaction risk is the MAX across all touched contracts.
+ */
+export async function simulateWithTrace(req: SimulationRequest): Promise<SimulationResult> {
+  // Step 1: standard simulation
+  const simResult = await simulateTransaction(req);
+
+  // Step 2: trace
+  const traceResult = await traceTransaction({
+    chainId: req.chainId,
+    from: req.from,
+    to: req.to,
+    data: req.data,
+    value: req.value,
+    blockNumber: req.blockNumber,
+  });
+
+  // Step 3: scan each traced contract
+  const scanTargets = filterScanTargets(traceResult.uniqueAddresses);
+  const tracedContracts: TracedContract[] = [];
+
+  // Build a map of call types and max depth per address from the trace
+  const callMeta = new Map<string, { callTypes: Set<string>; maxDepth: number }>();
+  for (const call of traceResult.calls) {
+    const lower = call.address.toLowerCase();
+    const existing = callMeta.get(lower);
+    if (existing) {
+      existing.callTypes.add(call.type);
+      existing.maxDepth = Math.max(existing.maxDepth, call.depth);
+    } else {
+      callMeta.set(lower, { callTypes: new Set([call.type]), maxDepth: call.depth });
+    }
+  }
+
+  let maxRiskScore = 0;
+  let maxRiskLevel = "safe";
+
+  // Process well-known addresses first (no scanning needed)
+  for (const addr of traceResult.uniqueAddresses) {
+    const lower = addr.toLowerCase() as Address;
+    if (isWellKnown(lower)) {
+      const meta = callMeta.get(lower);
+      tracedContracts.push({
+        address: lower,
+        wellKnown: true,
+        callTypes: meta ? Array.from(meta.callTypes) : ["CALL"],
+        maxDepth: meta?.maxDepth ?? 0,
+      });
+    }
+  }
+
+  // Scan non-well-known addresses with rate limiting
+  for (let i = 0; i < scanTargets.length; i++) {
+    const addr = scanTargets[i];
+    const meta = callMeta.get(addr.toLowerCase());
+
+    let scanResult: ScanResult | undefined;
+    try {
+      const fetched = await fetchContractSource(addr, req.chainId);
+      if (fetched.source) {
+        scanResult = scanContractSource(fetched.source);
+      } else if (fetched.bytecode) {
+        scanResult = scanBytecode(fetched.bytecode);
+      }
+    } catch {
+      // Fetch failed -- we still record the address, just without a scan
+    }
+
+    if (scanResult) {
+      if (scanResult.riskScore > maxRiskScore) {
+        maxRiskScore = scanResult.riskScore;
+        maxRiskLevel = scanResult.riskLevel;
+      }
+    }
+
+    tracedContracts.push({
+      address: addr,
+      wellKnown: false,
+      scanResult,
+      callTypes: meta ? Array.from(meta.callTypes) : ["CALL"],
+      maxDepth: meta?.maxDepth ?? 0,
+    });
+
+    // Rate limit between fetches (skip delay after last item)
+    if (i < scanTargets.length - 1) {
+      await delay(FETCH_DELAY_MS);
+    }
+  }
+
+  // Step 4: aggregate risk into the simulation result
+  if (maxRiskScore > 0) {
+    if (maxRiskScore >= 70) {
+      simResult.riskIndicators.push("traced_contract_high_risk");
+    } else if (maxRiskScore >= 40) {
+      simResult.riskIndicators.push("traced_contract_medium_risk");
+    }
+  }
+
+  // Check for delegatecall in non-well-known contracts -- extra risky
+  const hasDelegatecall = tracedContracts.some(
+    (c) => !c.wellKnown && c.callTypes.includes("DELEGATECALL"),
+  );
+  if (hasDelegatecall) {
+    simResult.riskIndicators.push("delegatecall_in_trace");
+  }
+
+  simResult.trace = {
+    fullTrace: traceResult.fullTrace,
+    totalCalls: traceResult.calls.length,
+    uniqueContracts: traceResult.uniqueAddresses.length,
+    scannedContracts: tracedContracts.filter((c) => c.scanResult !== undefined).length,
+    contracts: tracedContracts,
+    maxRiskScore,
+    maxRiskLevel,
+    fallbackReason: traceResult.fallbackReason,
+  };
+
+  return simResult;
 }
 
 function extractRevertReason(error: any): string {

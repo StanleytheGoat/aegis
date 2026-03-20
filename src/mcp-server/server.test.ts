@@ -77,6 +77,32 @@ vi.mock("../risk-engine/simulator.js", () => ({
     riskIndicators: [],
     estimatedCostEth: "0.001000",
   })),
+  simulateWithTrace: vi.fn(async (req: any) => ({
+    success: true,
+    gasUsed: 50000n,
+    gasAnomaly: false,
+    returnData: "0x",
+    riskIndicators: [],
+    estimatedCostEth: "0.001000",
+    trace: {
+      contractsScanned: 1,
+      maxRiskScore: 5,
+      maxRiskLevel: "safe",
+      hasDelegatecall: false,
+      contracts: [{
+        address: req.to || "0x1234",
+        callType: "CALL",
+        riskScore: 5,
+        riskLevel: "safe",
+        findings: [],
+      }],
+    },
+  })),
+  fetchContractSource: vi.fn(async (address: string, chainId: number) => ({
+    source: "contract {}",
+    bytecode: "0x00",
+    name: "MockContract",
+  })),
   checkTokenSellability: vi.fn(async (_chainId: number, _token: string, _holder: string) => ({
     canSell: true,
     indicators: [],
@@ -152,10 +178,11 @@ describe("MCP Server", () => {
     });
 
     it("should fetch source from explorer when contractAddress given", async () => {
-      fetchMock.mockResolvedValueOnce({
-        json: async () => ({
-          result: [{ SourceCode: "contract Fetched { }" }],
-        }),
+      const { fetchContractSource } = await import("../risk-engine/simulator.js");
+      (fetchContractSource as any).mockResolvedValueOnce({
+        source: "contract Fetched { }",
+        bytecode: "0x6080",
+        name: "Fetched",
       });
 
       const result = await callTool(server, "scan_contract", {
@@ -163,8 +190,7 @@ describe("MCP Server", () => {
         chainId: 1,
       });
       const data = parseToolResult(result);
-      // Should have called fetch to get source
-      expect(fetchMock).toHaveBeenCalled();
+      expect(fetchContractSource).toHaveBeenCalled();
       expect(data.riskScore).toBeDefined();
     });
 
@@ -187,7 +213,12 @@ describe("MCP Server", () => {
     });
 
     it("should return error when fetch fails and no source/bytecode", async () => {
-      fetchMock.mockRejectedValue(new Error("Network error"));
+      const { fetchContractSource } = await import("../risk-engine/simulator.js");
+      (fetchContractSource as any).mockResolvedValueOnce({
+        source: null,
+        bytecode: null,
+        name: null,
+      });
 
       const result = await callTool(server, "scan_contract", {
         contractAddress: "0x1234567890abcdef1234567890abcdef12345678",
@@ -198,12 +229,18 @@ describe("MCP Server", () => {
     });
 
     it("should return error for unsupported chain when only address provided", async () => {
+      const { fetchContractSource } = await import("../risk-engine/simulator.js");
+      (fetchContractSource as any).mockResolvedValueOnce({
+        source: null,
+        bytecode: null,
+        name: null,
+      });
+
       const result = await callTool(server, "scan_contract", {
         contractAddress: "0x1234567890abcdef1234567890abcdef12345678",
         chainId: 999,
       });
       const data = parseToolResult(result);
-      // Unsupported chain returns no data from fetchContractSource
       expect(data.error).toContain("Could not fetch");
     });
 
@@ -341,10 +378,11 @@ describe("MCP Server", () => {
     });
 
     it("should mark dangerous when contract scan is risky", async () => {
-      fetchMock.mockResolvedValue({
-        json: async () => ({
-          result: [{ SourceCode: "contract honeypot { uint sellTax = 99; }" }],
-        }),
+      const { fetchContractSource } = await import("../risk-engine/simulator.js");
+      (fetchContractSource as any).mockResolvedValueOnce({
+        source: "contract honeypot { uint sellTax = 99; }",
+        bytecode: "0x6080",
+        name: "Honeypot",
       });
 
       const result = await callTool(server, "check_token", {
@@ -409,14 +447,15 @@ describe("MCP Server", () => {
     });
 
     it("should BLOCK when simulation shows revert", async () => {
-      const { simulateTransaction } = await import("../risk-engine/simulator.js");
-      (simulateTransaction as any).mockResolvedValueOnce({
+      const { simulateWithTrace } = await import("../risk-engine/simulator.js");
+      (simulateWithTrace as any).mockResolvedValueOnce({
         success: false,
         gasUsed: 0n,
         gasAnomaly: false,
         revertReason: "Execution reverted",
         riskIndicators: ["transaction_reverts"],
         estimatedCostEth: "0",
+        trace: { contractsScanned: 0, maxRiskScore: 0, maxRiskLevel: "safe", hasDelegatecall: false, contracts: [] },
       });
 
       const result = await callTool(server, "assess_risk", {
@@ -434,13 +473,14 @@ describe("MCP Server", () => {
     });
 
     it("should WARN on gas anomaly", async () => {
-      const { simulateTransaction } = await import("../risk-engine/simulator.js");
-      (simulateTransaction as any).mockResolvedValueOnce({
+      const { simulateWithTrace } = await import("../risk-engine/simulator.js");
+      (simulateWithTrace as any).mockResolvedValueOnce({
         success: true,
         gasUsed: 2000000n,
         gasAnomaly: true,
         riskIndicators: ["high_gas_usage"],
         estimatedCostEth: "0.05",
+        trace: { contractsScanned: 0, maxRiskScore: 0, maxRiskLevel: "safe", hasDelegatecall: false, contracts: [] },
       });
 
       const result = await callTool(server, "assess_risk", {
@@ -476,10 +516,11 @@ describe("MCP Server", () => {
     });
 
     it("should BLOCK when contract scan is high risk", async () => {
-      fetchMock.mockResolvedValue({
-        json: async () => ({
-          result: [{ SourceCode: "contract honeypot { uint sellTax = 99; }" }],
-        }),
+      const { fetchContractSource } = await import("../risk-engine/simulator.js");
+      (fetchContractSource as any).mockResolvedValueOnce({
+        source: "contract honeypot { uint sellTax = 99; }",
+        bytecode: "0x6080",
+        name: "Honeypot",
       });
 
       const result = await callTool(server, "assess_risk", {
