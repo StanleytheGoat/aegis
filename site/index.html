@@ -620,90 +620,6 @@
 
     .onchain-detail .value { color: var(--accent); word-break: break-all; }
 
-    /* ========== Revenue ========== */
-    .revenue-section {
-      border-top: 1px solid var(--border);
-    }
-
-    .revenue-box {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      gap: 3rem;
-      margin-top: 3rem;
-      align-items: start;
-    }
-
-    .revenue-stat {
-      text-align: center;
-      padding: 2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-
-    .revenue-stat .big-number {
-      font-size: 3.5rem;
-      font-weight: 800;
-      color: var(--accent);
-      font-family: var(--mono);
-      line-height: 1;
-    }
-
-    .revenue-stat .big-label {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin-top: 0.375rem;
-    }
-
-    .revenue-stat .big-sub {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
-
-    .revenue-details {
-      padding-top: 0.5rem;
-    }
-
-    .revenue-details h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .revenue-item {
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-      padding: 0.875rem 1rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-
-    .revenue-item-icon {
-      flex-shrink: 0;
-      width: 8px;
-      height: 8px;
-      background: var(--accent);
-      border-radius: 50%;
-      margin-top: 0.5rem;
-    }
-
-    .revenue-item strong {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.125rem;
-      font-size: 0.9375rem;
-    }
-
-    .revenue-item p {
-      color: var(--text-muted);
-      font-size: 0.875rem;
-      line-height: 1.55;
-    }
-
     /* ========== Footer ========== */
     footer {
       border-top: 1px solid var(--border);
@@ -753,8 +669,6 @@
       .steps-grid { grid-template-columns: 1fr; }
       .patterns-grid { grid-template-columns: repeat(2, 1fr); }
       .onchain-grid { grid-template-columns: 1fr; }
-      .revenue-box { grid-template-columns: 1fr; }
-      .revenue-stat { max-width: 200px; }
     }
 
     @media (max-width: 640px) {
@@ -1077,22 +991,14 @@
       <div class="onchain-grid">
         <div class="onchain-card fade-in">
           <h3>AegisGateway <span class="tag tag-base">Base</span></h3>
-          <p>Routes agent transactions through on-chain safety checks. Collects a 5 bps fee per transaction. Safe multisig is set at deployment - no admin key can redirect funds. Signatures include chain ID + contract address to prevent cross-chain replay.</p>
+          <p>Routes agent transactions through on-chain safety checks. Verifies attestation signatures before executing any DeFi call. Signatures include chain ID + contract address to prevent cross-chain replay.</p>
           <div class="onchain-detail">
             <span class="label">Network</span>
             <span class="value">Base (Chain ID 8453)</span>
           </div>
           <div class="onchain-detail">
-            <span class="label">Fee</span>
-            <span class="value">5 bps (0.05%), nonReentrant</span>
-          </div>
-          <div class="onchain-detail">
-            <span class="label">Fee Wallet</span>
-            <span class="value">Safe multisig, immutable</span>
-          </div>
-          <div class="onchain-detail">
             <span class="label">Security</span>
-            <span class="value">EIP-2 check, ecrecover guard, rescueStuckEth</span>
+            <span class="value">EIP-2 check, ecrecover guard, nonReentrant</span>
           </div>
         </div>
 
@@ -1120,46 +1026,6 @@
     </div>
   </section>
 
-  <!-- ========== Revenue ========== -->
-  <section id="revenue" class="revenue-section">
-    <div class="container">
-      <span class="section-label fade-in">Revenue Model</span>
-      <h2 class="section-title fade-in">Sustainable by design</h2>
-
-      <div class="revenue-box fade-in">
-        <div class="revenue-stat">
-          <div class="big-number">5</div>
-          <div class="big-label">Basis Points</div>
-          <div class="big-sub">per transaction</div>
-        </div>
-
-        <div class="revenue-details">
-          <h3>How fees work</h3>
-          <div class="revenue-item">
-            <div class="revenue-item-icon"></div>
-            <div>
-              <strong>Transparent on-chain fee</strong>
-              <p>AegisGateway collects 0.05% on transactions routed through the gateway. This is enforced in the smart contract and visible to all parties.</p>
-            </div>
-          </div>
-          <div class="revenue-item">
-            <div class="revenue-item-icon"></div>
-            <div>
-              <strong>Safe multisig fee recipient</strong>
-              <p>Fees are sent to a Safe multisig set at deployment time. No admin function can change the destination. withdrawFees is protected by nonReentrant. No rug-pull vector.</p>
-            </div>
-          </div>
-          <div class="revenue-item">
-            <div class="revenue-item-icon"></div>
-            <div>
-              <strong>MCP tools are free</strong>
-              <p>Off-chain scanning, simulation, and risk assessment carry no fee. Only on-chain gateway routing has a cost.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ========== Case Studies ========== -->
   <section id="case-studies" style="border-top: 1px solid var(--border);">
@@ -1245,7 +1111,7 @@
           <!-- Gateway -->
           <div style="text-align: center; flex: 1; min-width: 100px;">
             <div style="font-family: var(--mono); font-weight: 600; font-size: 0.875rem; color: #82aaff; margin-bottom: 0.75rem;">Gateway</div>
-            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Verifies<br>+ 5 bps fee<br>Safe multisig</div>
+            <div style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); line-height: 1.7;">Verifies<br>attestation<br>on-chain</div>
           </div>
 
           <div style="color: var(--text-dim); font-size: 1.25rem; padding-top: 0.25rem; flex-shrink: 0;">→</div>
