@@ -879,7 +879,7 @@
         <div class="pipeline-step reveal">
           <span class="pipeline-num">STEP 03</span>
           <h3>Enforce On-Chain</h3>
-          <p>Even if software fails, the blockchain doesn't. AegisGateway verifies a signed safety attestation before executing any DeFi call. The Uniswap v4 hook blocks unsafe swaps directly at the pool.</p>
+          <p>Even if software fails, the blockchain doesn't. AegisGateway verifies a signed safety attestation before executing any DeFi call. Pools with AegisSafetyHook installed add a second layer your agent can trust.</p>
         </div>
       </div>
     </div>
@@ -1043,15 +1043,15 @@
   <section id="onchain" style="border-top: 1px solid var(--border);">
     <div class="wrap">
       <span class="sh-label reveal">On-Chain Enforcement</span>
-      <h2 class="sh-title reveal">Two on-chain safety nets</h2>
+      <h2 class="sh-title reveal">On-chain enforcement</h2>
       <p class="sh-desc reveal">
-        Off-chain checks can be skipped. These can't. Smart contracts on Base enforce safety at the transaction and pool level.
+        Off-chain checks can be skipped. These can't. Two smart contracts on Base enforce safety at different levels.
       </p>
 
       <div class="chain-grid">
         <div class="chain-card reveal">
           <h3>AegisGateway <span class="chain-badge badge-base">Base</span></h3>
-          <p>Your agent routes DeFi calls through the Gateway instead of calling contracts directly. The Gateway checks for a valid safety attestation (signed by Aegis after scanning and simulating) before forwarding the call. No valid attestation = transaction reverts. Works for any DeFi action: swaps, lending, staking, approvals.</p>
+          <p>For agents. Instead of calling DeFi contracts directly, your agent routes calls through the Gateway. It checks for a valid safety attestation (signed by Aegis after scanning and simulating) before forwarding the call. No attestation = transaction reverts. Works for any DeFi action: swaps, lending, staking, approvals.</p>
           <div class="chain-meta">
             <span class="lbl">Network</span>
             <span class="val">Base (Chain ID 8453)</span>
@@ -1064,18 +1064,18 @@
 
         <div class="chain-card reveal">
           <h3>AegisSafetyHook <span class="chain-badge badge-v4">Uniswap v4</span></h3>
-          <p>Installed directly on Uniswap v4 pools. The hook runs <code style="font-family: var(--mono); font-size: 0.875rem;">beforeSwap</code> on every trade through that pool: it checks if either token is flagged as dangerous and verifies a valid safety attestation. This protects the pool itself, blocking unsafe swaps even from agents that don't use the Gateway.</p>
+          <p>For pool creators and LPs. Install this hook on your Uniswap v4 pool to require Aegis-verified attestations before any swap executes. Protects LPs from toxic flow and signals to agents that your pool is safe. A scam pool would never install this -- its presence is itself a trust signal.</p>
           <div class="chain-meta">
-            <span class="lbl">Type</span>
-            <span class="val">beforeSwap hook, immutable owner</span>
+            <span class="lbl">Who installs it</span>
+            <span class="val">Pool creators, when they deploy a new Uniswap v4 pool</span>
           </div>
           <div class="chain-meta">
-            <span class="lbl">Scope</span>
-            <span class="val">Pool-level -- protects all swaps, not just Aegis users</span>
+            <span class="lbl">What it does</span>
+            <span class="val">Runs beforeSwap: blocks flagged tokens, requires valid attestation</span>
           </div>
           <div class="chain-meta">
-            <span class="lbl">Action</span>
-            <span class="val">Reverts if token flagged, attestation missing/expired, or risk too high</span>
+            <span class="lbl">Why it matters</span>
+            <span class="val">Agents can treat hook-protected pools as inherently safer</span>
           </div>
         </div>
       </div>
