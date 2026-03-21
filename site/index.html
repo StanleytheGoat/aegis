@@ -9,6 +9,8 @@
   <meta name="author" content="Aegis">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://aegis-defi.netlify.app">
+  <link rel="apple-touch-icon" href="/og.png">
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -38,7 +40,9 @@
     "name": "Aegis",
     "description": "DeFi safety layer for autonomous AI agents. MCP server that scans contracts, simulates transactions, and enforces on-chain protection.",
     "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "DeFi Security",
     "operatingSystem": "Any",
+    "softwareVersion": "0.5.0",
     "url": "https://aegis-defi.netlify.app",
     "license": "https://opensource.org/licenses/MIT",
     "programmingLanguage": ["TypeScript", "Solidity"],
@@ -157,6 +161,15 @@
     /* Tab system */
     .int-panel { display: none; }
     .int-panel.active { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 
