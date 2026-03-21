@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: General Questions
+    url: https://github.com/aegis-defi/aegis/discussions
+    about: Use Discussions for general questions and support.

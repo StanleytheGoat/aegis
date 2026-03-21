@@ -42,8 +42,8 @@ export function createAegisServer(): McpServer {
     "scan_contract",
     "Analyze a smart contract's source code or bytecode for known exploit patterns, honeypot mechanics, rug-pull signals, and security vulnerabilities. Returns a risk score (0-100) and detailed findings. Use this BEFORE interacting with any unfamiliar contract.",
     {
-      source: z.string().optional().describe("Solidity source code of the contract to analyze"),
-      bytecode: z.string().optional().describe("Contract bytecode (hex) to analyze if source is unavailable"),
+      source: z.string().max(500_000).optional().describe("Solidity source code of the contract to analyze"),
+      bytecode: z.string().max(200_000).optional().describe("Contract bytecode (hex) to analyze if source is unavailable"),
       contractAddress: evmAddress.optional().describe("Contract address - if provided, will attempt to fetch source from block explorer"),
       chainId: z.number().default(1).describe("Chain ID (1=Ethereum, 8453=Base, 84532=Base Sepolia)"),
     },
@@ -99,7 +99,7 @@ export function createAegisServer(): McpServer {
       chainId: z.number().default(1).describe("Chain ID to simulate on"),
       from: evmAddress.describe("Sender address"),
       to: evmAddress.describe("Target contract address"),
-      data: z.string().describe("Transaction calldata (hex)"),
+      data: z.string().max(100_000).describe("Transaction calldata (hex)"),
       value: z.string().default("0").describe("ETH value to send (in wei)"),
     },
     async ({ chainId, from, to, data, value }) => {
@@ -176,7 +176,7 @@ export function createAegisServer(): McpServer {
       targetContract: evmAddress.describe("The contract being interacted with"),
       chainId: z.number().default(1).describe("Chain ID"),
       from: evmAddress.describe("The agent's wallet address"),
-      transactionData: z.string().optional().describe("Calldata for the transaction (hex)"),
+      transactionData: z.string().max(100_000).optional().describe("Calldata for the transaction (hex)"),
       value: z.string().default("0").describe("ETH value (in wei)"),
       tokenAddress: evmAddress.optional().describe("Token address if this involves a token swap"),
     },
@@ -293,9 +293,8 @@ export function createAegisServer(): McpServer {
             expiresAt: hookAtt.expiresAt.toString(),
             signature: hookAtt.signature,
           };
-        } catch {
-          // Attester key not configured - attestations unavailable
-          // MCP-only mode still works (agent gets the risk assessment)
+        } catch (err) {
+          console.error("[aegis] attestation generation failed:", err instanceof Error ? err.message : err);
         }
       }
 
@@ -343,8 +342,8 @@ export function createAegisServer(): McpServer {
               })),
             };
           }
-        } catch {
-          // Solodit enrichment is best-effort
+        } catch (err) {
+          console.error("[aegis] solodit enrichment failed:", err instanceof Error ? err.message : err);
         }
       }
 
@@ -380,7 +379,7 @@ export function createAegisServer(): McpServer {
       chainId: z.number().default(1).describe("Chain ID to trace on"),
       from: evmAddress.describe("Sender address"),
       to: evmAddress.describe("Target contract address"),
-      data: z.string().describe("Transaction calldata (hex)"),
+      data: z.string().max(100_000).describe("Transaction calldata (hex)"),
       value: z.string().default("0").describe("ETH value to send (in wei)"),
     },
     async ({ chainId, from, to, data, value }) => {
@@ -454,8 +453,8 @@ export function createAegisServer(): McpServer {
             riskLevel = scan.riskLevel;
             findings = scan.findings.length;
           }
-        } catch {
-          // fetch failed
+        } catch (err) {
+          console.error("[aegis] contract fetch failed for", addr, ":", err instanceof Error ? err.message : err);
         }
 
         if (riskScore !== null && riskScore > maxRisk) {

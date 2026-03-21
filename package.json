@@ -32,6 +32,7 @@
     "test:contracts": "hardhat test",
     "test": "vitest run",
     "demo": "tsx demo/catch-honeypot.ts",
+    "prepare": "husky",
     "prepublishOnly": "tsc"
   },
   "dependencies": {
@@ -49,6 +50,7 @@
     "hardhat": "^2.22.17",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
+    "husky": "^9.0.0",
     "vitest": "^2.1.0"
   },
   "keywords": [
