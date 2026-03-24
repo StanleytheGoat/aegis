@@ -137,6 +137,14 @@ import Layout from "../layouts/Layout.astro";
         <p id="recommendation-text" class="text-on-surface-variant text-sm leading-relaxed"></p>
       </div>
 
+      <!-- Share button -->
+      <div id="share-section" class="hidden text-center pt-2">
+        <button id="share-btn" class="inline-flex items-center gap-2 px-6 py-2.5 glass-card border border-outline-variant/30 rounded-xl text-sm text-on-surface-variant hover:text-on-surface hover:border-outline-variant/50 transition-all">
+          <span class="material-symbols-outlined text-[18px]">share</span>
+          <span id="share-btn-text">Copy shareable link</span>
+        </button>
+      </div>
+
     </div>
   </main>
 
@@ -330,9 +338,17 @@ import Layout from "../layouts/Layout.astro";
           return;
         }
 
+        // Update URL for sharing
+        const shareUrl = new URL(window.location.href);
+        shareUrl.search = "";
+        shareUrl.searchParams.set("address", address);
+        shareUrl.searchParams.set("chain", String(chainId));
+        history.replaceState(null, "", shareUrl.toString());
+
         // Show results
         loading.classList.add("hidden");
         results.classList.remove("hidden");
+        document.getElementById("share-section")!.classList.remove("hidden");
 
         renderVerdict(scanData.riskScore ?? 0);
         renderFindings(scanData.findings ?? []);
@@ -366,5 +382,25 @@ import Layout from "../layouts/Layout.astro";
     addressInput.addEventListener("input", () => {
       addressError.classList.add("hidden");
     });
+
+    // Share button
+    document.getElementById("share-btn")?.addEventListener("click", () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const txt = document.getElementById("share-btn-text");
+        if (txt) { txt.textContent = "Copied!"; setTimeout(() => { txt.textContent = "Copy shareable link"; }, 2000); }
+      });
+    });
+
+    // Auto-scan from URL params
+    const params = new URLSearchParams(window.location.search);
+    const urlAddress = params.get("address");
+    const urlChain = params.get("chain");
+    if (urlAddress && ADDRESS_RE.test(urlAddress)) {
+      addressInput.value = urlAddress;
+      if (urlChain && ["1", "8453", "84532"].includes(urlChain)) {
+        chainSelect.value = urlChain;
+      }
+      runScan();
+    }
   </script>
 </Layout>
