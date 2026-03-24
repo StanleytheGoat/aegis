@@ -1,0 +1,161 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { patterns } from "../../site-data/patterns.js";
+import type { PatternInfo } from "../../site-data/patterns.js";
+
+export function getStaticPaths() {
+  return patterns.map(p => ({
+    params: { id: p.id },
+    props: { pattern: p },
+  }));
+}
+
+interface Props {
+  pattern: PatternInfo;
+}
+
+const { pattern } = Astro.props;
+
+const severityLabel: Record<string, string> = {
+  critical: "Critical",
+  high: "High",
+  medium: "Medium",
+  low: "Low",
+  info: "Info",
+};
+
+const severityColor: Record<string, string> = {
+  critical: "text-error bg-error/10 border-error/30",
+  high: "text-error/80 bg-error/5 border-error/20",
+  medium: "text-primary-dim bg-primary-dim/10 border-primary-dim/30",
+  low: "text-tertiary bg-tertiary/10 border-tertiary/30",
+  info: "text-outline bg-outline/10 border-outline/30",
+};
+
+const detectionMethods: string[] = [];
+if (pattern.hasSourcePatterns) detectionMethods.push("Source code analysis");
+if (pattern.hasBytecodePatterns) detectionMethods.push("Bytecode scanning");
+if (!pattern.hasSourcePatterns && !pattern.hasBytecodePatterns) detectionMethods.push("Heuristic detection");
+---
+<Layout
+  title={`${pattern.name} - Aegis Pattern Library`}
+  description={pattern.description}
+  canonicalUrl={`https://aegis-defi.netlify.app/patterns/${pattern.id}`}
+>
+  <nav class="fixed top-0 w-full z-50 bg-surface-dim/70 backdrop-blur-xl" aria-label="Main navigation">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto">
+      <a href="/" class="flex items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="glow-gold" aria-hidden="true">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+          <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-black tracking-tight text-on-surface font-headline">Aegis</span>
+      </a>
+      <a href="/patterns" class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest">All Patterns</a>
+    </div>
+  </nav>
+
+  <main class="pt-28 pb-24 px-8 max-w-screen-md mx-auto">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-on-surface-variant mb-8">
+      <a href="/patterns" class="hover:text-on-surface transition-colors">Pattern Library</a>
+      <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+      <span class="text-on-surface">{pattern.name}</span>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-10">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class={`text-xs font-label font-semibold uppercase tracking-widest px-3 py-1 rounded-lg border ${severityColor[pattern.severity]}`}>
+          {severityLabel[pattern.severity]}
+        </span>
+        <span class="text-xs text-outline-variant px-2 py-0.5 bg-surface-container rounded-lg">{pattern.category}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-on-surface font-headline mb-4">{pattern.name}</h1>
+      <p class="text-on-surface-variant text-lg leading-relaxed">{pattern.description}</p>
+    </div>
+
+    <!-- Details grid -->
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card border border-outline-variant/20 rounded-xl p-6">
+        <h3 class="text-sm font-bold font-headline text-on-surface mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">speed</span>
+          Risk Weight
+        </h3>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-black font-headline text-on-surface">{pattern.riskWeight}</span>
+          <span class="text-sm text-on-surface-variant mb-1">/ 100</span>
+        </div>
+        <div class="mt-3 h-2 bg-surface-container-lowest/60 rounded-full overflow-hidden">
+          <div
+            class={`h-full rounded-full ${
+              pattern.riskWeight >= 80 ? "bg-error" :
+              pattern.riskWeight >= 60 ? "bg-primary-dim" :
+              pattern.riskWeight >= 40 ? "bg-tertiary" :
+              "bg-secondary"
+            }`}
+            style={`width: ${pattern.riskWeight}%`}
+          ></div>
+        </div>
+      </div>
+
+      <div class="glass-card border border-outline-variant/20 rounded-xl p-6">
+        <h3 class="text-sm font-bold font-headline text-on-surface mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary text-lg">search</span>
+          Detection Method
+        </h3>
+        <div class="space-y-2">
+          {detectionMethods.map(method => (
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary text-sm">check</span>
+              <span class="text-sm text-on-surface-variant">{method}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="glass-card border border-outline-variant/20 rounded-xl p-6 mb-6">
+      <h3 class="text-sm font-bold font-headline text-on-surface mb-3 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary-dim text-lg">psychology</span>
+        How This Attack Works
+      </h3>
+      <p class="text-on-surface-variant text-sm leading-relaxed">{pattern.description}</p>
+    </div>
+
+    <!-- What Aegis does -->
+    <div class="glass-card border border-outline-variant/20 rounded-xl p-6 mb-10">
+      <h3 class="text-sm font-bold font-headline text-on-surface mb-3 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-lg">shield</span>
+        How Aegis Detects It
+      </h3>
+      <p class="text-on-surface-variant text-sm leading-relaxed">
+        Aegis checks for this pattern using {
+          pattern.hasSourcePatterns && pattern.hasBytecodePatterns
+            ? "both source code regex matching and bytecode signature scanning"
+            : pattern.hasSourcePatterns
+              ? "source code regex pattern matching against known exploit signatures"
+              : pattern.hasBytecodePatterns
+                ? "bytecode-level signature scanning of deployed contract code"
+                : "heuristic analysis of contract behavior"
+        }. When detected, it contributes a risk weight of {pattern.riskWeight}/100 to the overall risk score.
+        {pattern.severity === "critical" && " A single finding of this pattern is enough to flag the contract as dangerous."}
+      </p>
+    </div>
+
+    <!-- Pattern ID -->
+    <div class="text-center">
+      <code class="text-xs text-outline font-mono px-3 py-1.5 bg-surface-container-lowest/40 border border-outline-variant/20 rounded-lg">{pattern.id}</code>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-12 pt-8 border-t border-outline-variant/10">
+      <p class="text-on-surface-variant text-sm mb-4">Want to check a contract for this pattern?</p>
+      <a href="/scan" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-bold rounded-xl text-sm hover:scale-105 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">radar</span>
+        Scan a Contract
+      </a>
+    </div>
+  </main>
+</Layout>

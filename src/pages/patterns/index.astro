@@ -1,0 +1,158 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { patterns, categories } from "../../site-data/patterns.js";
+
+const severityCounts = {
+  critical: patterns.filter(p => p.severity === "critical").length,
+  high: patterns.filter(p => p.severity === "high").length,
+  medium: patterns.filter(p => p.severity === "medium").length,
+  low: patterns.filter(p => p.severity === "low").length,
+};
+---
+<Layout
+  title="Exploit Pattern Library - Aegis"
+  description="Browse all 165 exploit detection patterns used by Aegis to protect DeFi agents. Search by keyword, filter by severity or category."
+  canonicalUrl="https://aegis-defi.netlify.app/patterns"
+>
+  <nav class="fixed top-0 w-full z-50 bg-surface-dim/70 backdrop-blur-xl" aria-label="Main navigation">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto">
+      <a href="/" class="flex items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="glow-gold" aria-hidden="true">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+          <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-black tracking-tight text-on-surface font-headline">Aegis</span>
+      </a>
+      <a href="/" class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest">Back to Home</a>
+    </div>
+  </nav>
+
+  <main class="pt-28 pb-24 px-8 max-w-screen-xl mx-auto">
+    <div class="text-center mb-12">
+      <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4">Pattern Library</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-on-surface font-headline mb-4">165 exploit detection patterns</h1>
+      <p class="text-on-surface-variant text-lg max-w-2xl mx-auto">Every pattern Aegis uses to protect your agent. Search, filter, and understand what gets caught.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      <div class="glass-card border border-error/20 rounded-xl p-4 text-center">
+        <p class="text-2xl font-black font-headline text-error">{severityCounts.critical}</p>
+        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Critical</p>
+      </div>
+      <div class="glass-card border border-error/10 rounded-xl p-4 text-center">
+        <p class="text-2xl font-black font-headline text-error/70">{severityCounts.high}</p>
+        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">High</p>
+      </div>
+      <div class="glass-card border border-primary-dim/20 rounded-xl p-4 text-center">
+        <p class="text-2xl font-black font-headline text-primary-dim">{severityCounts.medium}</p>
+        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Medium</p>
+      </div>
+      <div class="glass-card border border-tertiary/20 rounded-xl p-4 text-center">
+        <p class="text-2xl font-black font-headline text-tertiary">{severityCounts.low}</p>
+        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Low</p>
+      </div>
+    </div>
+
+    <!-- Search + Filter -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+      <div class="flex-1">
+        <input
+          id="search"
+          type="text"
+          placeholder="Search patterns..."
+          class="w-full bg-surface-container-lowest/60 border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+        />
+      </div>
+      <select
+        id="severity-filter"
+        class="bg-surface-container-lowest/60 border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+      >
+        <option value="">All severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select
+        id="category-filter"
+        class="bg-surface-container-lowest/60 border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+      >
+        <option value="">All categories</option>
+        {categories.map(cat => <option value={cat}>{cat}</option>)}
+      </select>
+    </div>
+
+    <!-- Pattern count -->
+    <p id="result-count" class="text-sm text-on-surface-variant mb-4">Showing {patterns.length} patterns</p>
+
+    <!-- Pattern list -->
+    <div id="pattern-list" class="space-y-2">
+      {patterns.map(p => (
+        <a
+          href={`/patterns/${p.id}`}
+          class="pattern-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container transition-colors group"
+          data-name={p.name.toLowerCase()}
+          data-desc={p.description.toLowerCase()}
+          data-severity={p.severity}
+          data-category={p.category}
+        >
+          <span class={`w-1.5 h-1.5 rounded-full shrink-0 ${
+            p.severity === "critical" ? "bg-error" :
+            p.severity === "high" ? "bg-error/70" :
+            p.severity === "medium" ? "bg-primary-dim" :
+            "bg-tertiary"
+          }`}></span>
+          <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors flex-1 min-w-0 truncate">{p.name}</span>
+          <span class={`text-[10px] font-label uppercase tracking-widest shrink-0 ${
+            p.severity === "critical" ? "text-error" :
+            p.severity === "high" ? "text-error/70" :
+            p.severity === "medium" ? "text-primary-dim" :
+            "text-tertiary"
+          }`}>{p.severity}</span>
+          <span class="text-xs text-outline hidden md:block shrink-0 max-w-[200px] truncate">{p.category}</span>
+          <span class="material-symbols-outlined text-outline-variant text-sm group-hover:text-on-surface transition-colors">chevron_right</span>
+        </a>
+      ))}
+    </div>
+  </main>
+
+  <script>
+    const search = document.getElementById("search") as HTMLInputElement;
+    const severityFilter = document.getElementById("severity-filter") as HTMLSelectElement;
+    const categoryFilter = document.getElementById("category-filter") as HTMLSelectElement;
+    const resultCount = document.getElementById("result-count") as HTMLParagraphElement;
+    const items = document.querySelectorAll(".pattern-item") as NodeListOf<HTMLElement>;
+
+    function filterPatterns() {
+      const query = search.value.toLowerCase().trim();
+      const severity = severityFilter.value;
+      const category = categoryFilter.value;
+      let visible = 0;
+
+      items.forEach(item => {
+        const name = item.dataset.name || "";
+        const desc = item.dataset.desc || "";
+        const itemSev = item.dataset.severity || "";
+        const itemCat = item.dataset.category || "";
+
+        const matchesSearch = !query || name.includes(query) || desc.includes(query);
+        const matchesSeverity = !severity || itemSev === severity;
+        const matchesCategory = !category || itemCat === category;
+
+        if (matchesSearch && matchesSeverity && matchesCategory) {
+          item.style.display = "";
+          visible++;
+        } else {
+          item.style.display = "none";
+        }
+      });
+
+      resultCount.textContent = `Showing ${visible} pattern${visible !== 1 ? "s" : ""}`;
+    }
+
+    search.addEventListener("input", filterPatterns);
+    severityFilter.addEventListener("change", filterPatterns);
+    categoryFilter.addEventListener("change", filterPatterns);
+  </script>
+</Layout>
