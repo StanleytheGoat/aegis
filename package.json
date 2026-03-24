@@ -44,6 +44,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.5",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.1.0",
     "@tailwindcss/vite": "^4.2.2",
