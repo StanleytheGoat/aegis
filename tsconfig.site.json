@@ -1,0 +1,5 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "include": ["src/pages/**/*", "src/layouts/**/*", "src/components/**/*"],
+  "exclude": ["src/risk-engine", "src/mcp-server", "src/index.ts"]
+}
