@@ -20,3 +20,4 @@ typechain-types/
 .claude/skills/
 outreach/
 scripts/deploy.ts
+.planning/
