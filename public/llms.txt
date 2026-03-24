@@ -1,0 +1,171 @@
+# Aegis
+
+> DeFi safety layer for autonomous AI agents. MCP server that scans contracts, simulates transactions, and enforces on-chain protection before AI agents execute trades.
+
+## What it does
+
+Aegis protects autonomous AI agents from DeFi exploits. It sits between the agent's decision to trade and the actual on-chain execution, providing three layers of defense:
+
+1. **Static Analysis** - Scans contract source code and bytecode against 165 known exploit patterns (honeypots, rug pulls, reentrancy, fake ownership renounce, etc.)
+2. **Transaction Simulation** - Forks the target chain and simulates the transaction to detect reverts, abnormal gas usage, and hidden state changes before any real funds move.
+3. **On-Chain Enforcement** - AegisGateway smart contract and Uniswap v4 hook that enforce safety checks at the protocol level, with an immutable cold wallet for fee collection.
+
+## Tools
+
+Aegis exposes 6 MCP tools:
+
+### scan_contract
+Analyze a smart contract for exploit patterns.
+- `source` (string, optional): Solidity source code
+- `bytecode` (string, optional): Contract bytecode (hex)
+- `contractAddress` (string, optional): Address to fetch source from block explorer
+- `chainId` (number, default: 1): Chain ID (1=Ethereum, 8453=Base, 84532=Base Sepolia)
+- Returns: risk score (0-100), matched patterns with severity, detailed findings
+
+### simulate_transaction
+Simulate a transaction on a forked chain without executing it.
+- `chainId` (number, default: 1): Chain ID
+- `from` (string, required): Sender address
+- `to` (string, required): Target contract address
+- `data` (string, required): Transaction calldata (hex)
+- `value` (string, default: "0"): ETH value in wei
+- Returns: success/revert status, gas used, anomaly flags
+
+### check_token
+Check if a token is safe to trade (anti-honeypot).
+- `tokenAddress` (string, required): Token contract address
+- `chainId` (number, default: 1): Chain ID
+- `holderAddress` (string, optional): Address to check balance for
+- Returns: sellability check, contract scan results, overall assessment (LIKELY_SAFE or POTENTIALLY_DANGEROUS)
+
+### assess_risk
+Comprehensive all-in-one risk assessment. Recommended before any DeFi interaction. Returns a signed attestation when the decision is ALLOW or WARN, which agents can submit directly to the AegisGateway contract or encode as hookData for Uniswap v4 hook-protected pools. Falls back to MCP-only mode (risk assessment without signed attestations) if no attester key is configured.
+- `action` (enum: swap, approve, transfer, interact): Type of action
+- `targetContract` (string, required): Contract being interacted with
+- `chainId` (number, default: 1): Chain ID
+- `from` (string, required): Agent's wallet address
+- `transactionData` (string, optional): Calldata (hex)
+- `value` (string, default: "0"): ETH value in wei
+- `tokenAddress` (string, optional): Token address for swap actions
+- Returns: decision (ALLOW, WARN, BLOCK), overall risk score, risk factors, per-check details, Solodit cross-references, recommendation, signed attestation (for ALLOW/WARN)
+
+### trace_transaction
+Trace every internal call in a multi-contract transaction. Uses debug_traceCall to extract the full call tree, then scans each unique non-well-known contract.
+- `chainId` (number, default: 1): Chain ID
+- `from` (string, required): Sender address
+- `to` (string, required): Target contract address
+- `data` (string, required): Transaction calldata (hex)
+- `value` (string, default: "0"): ETH value in wei
+- Returns: full call tree, per-contract risk scores, unique contracts count, max risk across all contracts
+
+### search_solodit
+Search 50,000+ real-world smart contract audit findings from top security firms (Cyfrin, Sherlock, Code4rena, Trail of Bits, OpenZeppelin) via the Solodit API.
+- `keywords` (string, required): Search keywords (e.g., "reentrancy", "flash loan oracle")
+- `impact` (array, default: ["HIGH", "MEDIUM"]): Severity filter
+- `pageSize` (number, default: 10): Number of results (max 20)
+- Returns: matching audit findings with title, severity, tags, and URLs
+
+## Exploit Patterns Detected
+
+1. Asymmetric Buy/Sell Tax (critical) - Traps funds with high sell tax
+2. Sell Pause Mechanism (critical) - Owner can disable selling
+3. Hidden Max Sell Amount (high) - Prevents large position exits
+4. Fake Ownership Renounce (critical) - Hidden owner retains control
+5. Reentrancy Vulnerability (critical) - External call before state update
+6. Unrestricted Minting (high) - Unlimited token minting
+7. Hidden Admin Functions (high) - Non-standard access control
+8. Unlimited Approval Requirement (medium) - Dangerous token approvals
+9. Blacklist Mechanism (medium) - Address blocking capability
+10. Upgradeable Proxy (medium) - Logic can change post-deploy
+11. Flash Loan Vulnerability (high) - Manipulable price oracles
+12. Permit/Approval Phishing (high) - Approval-draining mechanics
+13. Metamorphic Contract (critical) - CREATE2 + SELFDESTRUCT redeployment attack
+14. Hidden Balance Modifier (critical) - Direct balance manipulation by owner
+15. Hidden Fee Modifier (high) - Dynamic tax changes post-launch
+16. Hidden Transfer Drain (critical) - Owner drains holder balances
+17. Oracle Manipulation (critical) - Flash loan price attacks via spot reserves
+18. Transfer Callback Trap (critical) - Delayed honeypot activation
+19. MEV Sandwich Risk (high) - Low liquidity sandwich attack vulnerability
+20. Malicious Permit (high) - Permit approving wrong address
+21. Unaudited LP Locker (high) - Owner emergency withdraw on LP locks
+22. Burn Price Manipulation (high) - Owner burns from LP to inflate price
+
+## Integration
+
+### Quick start (Claude Desktop / Claude Code)
+```
+claude mcp add aegis npx aegis-defi
+```
+
+### MCP config JSON
+```json
+{
+  "mcpServers": {
+    "aegis": {
+      "command": "npx",
+      "args": ["aegis-defi"]
+    }
+  }
+}
+```
+
+### Programmatic (Node.js)
+```typescript
+import { createAegisServer } from "aegis-defi";
+const server = createAegisServer();
+```
+
+### ElizaOS Plugin
+```typescript
+import aegisPlugin from "@aegis-defi/plugin-elizaos";
+// Add to your agent's plugins array
+```
+
+### Coinbase AgentKit
+```typescript
+import { aegisActionProvider } from "@aegis-defi/agentkit";
+const agent = await AgentKit.from({
+  actionProviders: [aegisActionProvider()],
+});
+```
+
+### Environment variables
+- `ETHERSCAN_API_KEY` - For fetching verified contract source from Etherscan/Basescan
+- `SOLODIT_API_KEY` - Optional. Enables cross-referencing findings against 50K+ real audit results from Solodit. Free, self-service key at solodit.cyfrin.io (profile > API Keys). Each agent operator uses their own key (20 req/min). Without a key, all other tools work fully -- Solodit enrichment is simply skipped
+
+## On-Chain
+
+Network: Base (Chain ID 8453)
+
+### AegisGateway
+Address: 0x62c64c063ddbcd438f924184c03d8dad45230fa3 (Base mainnet, verified on Basescan)
+Routes agent transactions through safety checks with on-chain enforcement. Signatures include chain ID + contract address to prevent cross-chain replay.
+- Ownership transferred to Safe multisig
+- Source verified on Basescan
+
+### AegisSafetyHook (Uniswap v4)
+Address: 0xaEE532d9707b056f4d0939b91D4031298F7340C0 (Base mainnet, verified on Basescan)
+Uniswap v4 hook that runs safety checks before swaps execute. Deployed via CREATE2.
+- Blocks swaps without valid safety attestation
+- Blocks swaps involving flagged tokens
+- Hook owner is immutable
+- Source verified on Basescan
+
+## Security
+
+Built following ethskills (github.com/austintgriffith/ethskills) Ethereum production best practices:
+- Signatures include chain ID + contract address (no cross-chain replay)
+- EIP-2 s-value malleability check on all ecrecover calls
+- Zero-address validation on all constructors and admin functions
+- Fee math: multiply before divide, basis points, overflow guards
+- 165 tests (42 contract + 123 TypeScript). Fork tested against real Base mainnet state
+- Source verified on Basescan
+
+## Links
+
+- Website: https://aegis-defi.netlify.app
+- GitHub: https://github.com/StanleytheGoat/aegis
+- ethskills reference: https://github.com/austintgriffith/ethskills
+- License: MIT
+- Runtime: Node.js 18+
+- Package: `aegis-defi` on npm
