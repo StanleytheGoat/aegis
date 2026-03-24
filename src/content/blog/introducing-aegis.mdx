@@ -1,0 +1,60 @@
+---
+title: "Introducing Aegis: A Safety Layer for Autonomous DeFi Agents"
+description: "AI agents are trading on-chain without knowing if contracts are safe. Aegis fixes that with 165 exploit patterns, fork simulation, and on-chain enforcement."
+date: "2026-03-24"
+author: "Aegis Team"
+tags: ["announcement", "defi", "security", "mcp"]
+---
+
+AI agents are making on-chain transactions. They approve tokens, swap on DEXes, and interact with smart contracts - all without the ability to distinguish a safe contract from a scam.
+
+In Q4 2025, agent-related DeFi exploits increased by 420%. Over $62 million in losses from preventable attacks. The problem isn't the agents - it's that they have no safety infrastructure.
+
+## What Aegis does
+
+Aegis sits between your agent's intent and the blockchain. Before any transaction executes, Aegis:
+
+1. **Scans the contract** against 165 known exploit patterns (honeypots, reentrancy, fake ownership, hidden admin functions, and more)
+2. **Simulates the transaction** on a forked chain to detect reverts, abnormal gas, and unexpected outcomes
+3. **Checks token sellability** to catch honeypot tokens that trap funds
+4. **Signs an attestation** that on-chain contracts can verify
+
+## How it works
+
+Aegis is an MCP server. One command adds it to Claude Code:
+
+```bash
+claude mcp add aegis npx aegis-defi
+```
+
+Your agent now has 6 safety tools it can call before any DeFi interaction. The recommended flow:
+
+```
+Agent wants to swap tokens
+  -> Calls assess_risk
+  -> Aegis scans contract (165 patterns)
+  -> Aegis simulates transaction (forked chain)
+  -> Aegis checks token (honeypot detection)
+  -> Returns ALLOW / WARN / BLOCK decision
+  -> Agent proceeds or stops
+```
+
+## On-chain enforcement
+
+Software checks can be bypassed. That's why Aegis also deploys smart contracts on Base:
+
+- **AegisGateway** - Requires a valid safety attestation before forwarding any DeFi call
+- **AegisSafetyHook** - A Uniswap v4 hook that blocks swaps on flagged tokens
+
+No attestation = transaction reverts. The blockchain enforces what the software recommends.
+
+## Open source, zero cost
+
+Aegis is MIT licensed and free to use. No API keys required for core functionality. No token, no governance, no VC.
+
+- [GitHub](https://github.com/StanleytheGoat/aegis)
+- [npm](https://www.npmjs.com/package/aegis-defi)
+- [Scan a contract](/scan)
+- [Read the docs](/docs)
+
+Every autonomous agent operating in DeFi should have a safety layer. Aegis is that layer.

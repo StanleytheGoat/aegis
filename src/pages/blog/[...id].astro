@@ -1,0 +1,72 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map(post => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<Layout
+  title={`${post.data.title} - Aegis Blog`}
+  description={post.data.description}
+  canonicalUrl={`https://aegis-defi.netlify.app/blog/${post.id}`}
+>
+  <nav class="fixed top-0 w-full z-50 bg-surface-dim/70 backdrop-blur-xl">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto">
+      <a href="/" class="flex items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="glow-gold" aria-hidden="true">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+          <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-black tracking-tight text-on-surface font-headline">Aegis</span>
+      </a>
+      <a href="/blog" class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest">All Posts</a>
+    </div>
+  </nav>
+
+  <main class="pt-28 pb-24 px-8 max-w-screen-md mx-auto">
+    <div class="mb-10">
+      <div class="flex flex-wrap gap-2 mb-4">
+        {post.data.tags.map(tag => (
+          <span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant px-2 py-0.5 bg-surface-container rounded">{tag}</span>
+        ))}
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-on-surface font-headline mb-4">{post.data.title}</h1>
+      <div class="flex items-center gap-4 text-sm text-on-surface-variant">
+        <span>{post.data.date}</span>
+        <span>{post.data.author}</span>
+      </div>
+    </div>
+
+    <article class="prose prose-invert prose-sm max-w-none
+      [&_h2]:text-xl [&_h2]:font-bold [&_h2]:font-headline [&_h2]:text-on-surface [&_h2]:mt-10 [&_h2]:mb-4
+      [&_h3]:text-lg [&_h3]:font-bold [&_h3]:font-headline [&_h3]:text-on-surface [&_h3]:mt-8 [&_h3]:mb-3
+      [&_p]:text-on-surface-variant [&_p]:leading-relaxed [&_p]:mb-4
+      [&_a]:text-primary [&_a]:hover:underline
+      [&_strong]:text-on-surface
+      [&_ul]:text-on-surface-variant [&_ul]:space-y-1 [&_ul]:mb-4
+      [&_ol]:text-on-surface-variant [&_ol]:space-y-1 [&_ol]:mb-4
+      [&_li]:text-on-surface-variant
+      [&_code]:text-primary [&_code]:font-mono [&_code]:text-xs [&_code]:bg-surface-container-lowest/60 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded
+      [&_pre]:bg-surface-container-lowest/60 [&_pre]:border [&_pre]:border-outline-variant/20 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:mb-6
+      [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-on-surface-variant
+      [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:text-on-surface-variant [&_blockquote]:italic
+      [&_hr]:border-outline-variant/20 [&_hr]:my-8
+    ">
+      <Content />
+    </article>
+
+    <div class="mt-12 pt-8 border-t border-outline-variant/10 text-center">
+      <a href="/blog" class="text-primary hover:text-on-surface transition-colors text-sm font-medium">
+        &larr; Back to all posts
+      </a>
+    </div>
+  </main>
+</Layout>

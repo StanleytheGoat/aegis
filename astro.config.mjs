@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import starlight from "@astrojs/starlight";
+import mdx from "@astrojs/mdx";
 
 export default defineConfig({
   outDir: "./dist/site",
@@ -38,6 +39,7 @@ export default defineConfig({
       customCss: [],
       disable404Route: true,
     }),
+    mdx(),
   ],
   vite: {
     plugins: [tailwindcss()],

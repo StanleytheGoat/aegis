@@ -39,6 +39,7 @@
     "preview:site": "astro preview"
   },
   "dependencies": {
+    "@astrojs/mdx": "^4.0.4",
     "@astrojs/starlight": "^0.33.2",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "viem": "^2.21.0",

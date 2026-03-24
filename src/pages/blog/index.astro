@@ -1,0 +1,52 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog")).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+---
+<Layout
+  title="Blog - Aegis"
+  description="Exploit breakdowns, project updates, and DeFi security analysis from the Aegis team."
+  canonicalUrl="https://aegis-defi.netlify.app/blog"
+>
+  <nav class="fixed top-0 w-full z-50 bg-surface-dim/70 backdrop-blur-xl">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto">
+      <a href="/" class="flex items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="glow-gold" aria-hidden="true">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#070d1f" stroke="#ffe792" stroke-width="1.5"/>
+          <path d="M9 12l2 2 4-4" stroke="#ffe792" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-black tracking-tight text-on-surface font-headline">Aegis</span>
+      </a>
+      <a href="/" class="text-on-surface-variant hover:text-on-surface transition-colors font-label text-[10px] uppercase tracking-widest">Back to Home</a>
+    </div>
+  </nav>
+
+  <main class="pt-28 pb-24 px-8 max-w-screen-md mx-auto">
+    <div class="mb-12">
+      <p class="text-primary font-label text-[10px] uppercase tracking-[0.3em] mb-4">Blog</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-on-surface font-headline mb-4">Updates & Analysis</h1>
+      <p class="text-on-surface-variant text-lg">Exploit breakdowns, project updates, and DeFi security analysis.</p>
+    </div>
+
+    <div class="space-y-6">
+      {posts.map(post => (
+        <a href={`/blog/${post.id}`} class="block glass-card border border-outline-variant/20 rounded-2xl p-6 hover:border-primary/30 transition-all group">
+          <div class="flex flex-wrap gap-2 mb-3">
+            {post.data.tags.map(tag => (
+              <span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant px-2 py-0.5 bg-surface-container rounded">{tag}</span>
+            ))}
+          </div>
+          <h2 class="text-xl font-bold font-headline text-on-surface group-hover:text-primary transition-colors mb-2">{post.data.title}</h2>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-3">{post.data.description}</p>
+          <div class="flex items-center gap-4 text-xs text-outline">
+            <span>{post.data.date}</span>
+            <span>{post.data.author}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </main>
+</Layout>
